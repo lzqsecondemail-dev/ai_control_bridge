@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ACB Mock ChatGPT</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #fafafa;
+        color: #222;
+      }
+
+      .wrap {
+        max-width: 900px;
+        margin: 20px auto;
+        padding: 0 16px 24px;
+      }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      label {
+        font-size: 14px;
+      }
+
+      select,
+      button {
+        padding: 8px 10px;
+      }
+
+      .messages {
+        display: grid;
+        gap: 12px;
+      }
+
+      .message {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 10px;
+      }
+
+      .meta {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 12px;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>ACB Mock ChatGPT Page (M1-B)</h1>
+
+      <div class="toolbar">
+        <label for="channelSelect">当前模拟通道</label>
+        <select id="channelSelect">
+          <option value="execution-controller" data-name="执行总控" data-type="controller">执行总控</option>
+          <option value="engineering-advisor" data-name="工程参谋" data-type="advisor">工程参谋</option>
+          <option value="test-advisor" data-name="测试参谋" data-type="advisor">测试参谋</option>
+          <option value="security-advisor" data-name="安全参谋" data-type="advisor">安全参谋</option>
+          <option value="ux-advisor" data-name="UI/UX 参谋" data-type="advisor">UI/UX 参谋</option>
+        </select>
+        <button id="appendReply" type="button">Append Assistant Reply</button>
+        <button id="simulateStreaming" type="button">Simulate Streaming Reply</button>
+      </div>
+
+      <div
+        id="acb-current-channel"
+        data-channel-id="execution-controller"
+        data-channel-name="执行总控"
+        data-channel-type="controller"
+      ></div>
+
+      <div class="messages" data-acb-chat="messages">
+        <div class="message" data-acb-role="user" id="userMessage">
+          <span class="meta">User</span>
+          请输出当前通道的 M1-B mock 验证建议。
+        </div>
+        <div class="message" data-acb-role="assistant" id="assistantMessage">
+          <span class="meta">Assistant</span>
+          已准备好。请选择通道并触发 Append 或 Streaming。
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const channelSelect = document.getElementById("channelSelect");
+        const channelState = document.getElementById("acb-current-channel");
+        const appendBtn = document.getElementById("appendReply");
+        const streamBtn = document.getElementById("simulateStreaming");
+        const userEl = document.getElementById("userMessage");
+        const assistantEl = document.getElementById("assistantMessage");
+
+        let appendCount = 0;
+        let streaming = false;
+        let intervalId = null;
+
+        function applySelectedChannelMeta() {
+          const selected = channelSelect.options[channelSelect.selectedIndex];
+          channelState.dataset.channelId = selected.value;
+          channelState.dataset.channelName = selected.dataset.name || selected.textContent.trim();
+          channelState.dataset.channelType = selected.dataset.type || "advisor";
+        }
+
+        function getChannelName() {
+          return channelState.dataset.channelName || "未知通道";
+        }
+
+        function setUserPromptText() {
+          userEl.lastChild.textContent = "请输出「" + getChannelName() + "」的当前建议。";
+        }
+
+        channelSelect.addEventListener("change", function () {
+          applySelectedChannelMeta();
+          setUserPromptText();
+        });
+
+        appendBtn.addEventListener("click", function () {
+          if (streaming) {
+            return;
+          }
+          appendCount += 1;
+          assistantEl.lastChild.textContent += " [" + getChannelName() + " append-" + appendCount + "] 已补充反馈。";
+        });
+
+        streamBtn.addEventListener("click", function () {
+          if (streaming) {
+            return;
+          }
+          streaming = true;
+          appendBtn.disabled = true;
+          streamBtn.disabled = true;
+
+          const channelName = getChannelName();
+          const chunks = [
+            "[" + channelName + "] 正在整理",
+            " -> 分析上下文",
+            " -> 输出执行建议",
+            " -> 等待稳定 2 秒",
+            " -> 写入 latest feedback。"
+          ];
+
+          let index = 0;
+          assistantEl.lastChild.textContent = "";
+
+          intervalId = setInterval(function () {
+            if (index >= chunks.length) {
+              clearInterval(intervalId);
+              intervalId = null;
+              streaming = false;
+              appendBtn.disabled = false;
+              streamBtn.disabled = false;
+              return;
+            }
+            assistantEl.lastChild.textContent += chunks[index];
+            index += 1;
+          }, 450);
+        });
+
+        applySelectedChannelMeta();
+        setUserPromptText();
+      })();
+    </script>
+  </body>
+</html>

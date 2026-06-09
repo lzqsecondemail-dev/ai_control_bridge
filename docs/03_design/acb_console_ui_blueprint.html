@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ACB 控制台静态 UI 蓝图页</title>
+<style>
+/* ===== Reset ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ===== Variables ===== */
+:root {
+  --bg: #1e1e2e;
+  --surface: #262637;
+  --surface-hi: #2e2e42;
+  --border: #363650;
+  --text: #e0e0e8;
+  --text-dim: #9898b0;
+  --text-faint: #686884;
+  --accent: #7c9ff0;
+  --accent-dim: #5a7ac8;
+  --green: #7ec98a;
+  --green-bg: #1a3a22;
+  --yellow: #e8c84a;
+  --yellow-bg: #3a3418;
+  --red: #e8605a;
+  --red-bg: #3a1a1a;
+  --grey: #787890;
+  --grey-bg: #2a2a38;
+  --lock-red: #d04040;
+  --lock-red-bg: #2a1018;
+  --blue: #60a0e0;
+  --blue-bg: #1a2a3a;
+  --purple: #b090e0;
+  --purple-bg: #2a1a3a;
+  --radius: 6px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --mono: "SF Mono", "Cascadia Code", "Consolas", "Microsoft YaHei Mono", monospace;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* ===== Page Header ===== */
+.page-header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.page-header h1 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+.page-header .badge-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.badge-warn { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow); }
+.badge-info { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue); }
+.badge-fake { background: var(--purple-bg); color: var(--purple); border: 1px solid var(--purple); }
+
+/* ===== Top Status Bar ===== */
+.top-bar {
+  background: var(--surface-hi);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 24px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  white-space: nowrap;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.chip .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+.dot-green  { background: var(--green); }
+.dot-yellow { background: var(--yellow); }
+.dot-red    { background: var(--red); }
+.dot-grey   { background: var(--grey); }
+.dot-blue   { background: var(--blue); }
+
+/* ===== Main Layout ===== */
+.main-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr 260px;
+  gap: 0;
+  min-height: 0;
+}
+
+/* ===== Columns ===== */
+.col-left, .col-center, .col-right {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.col-left  { border-right: 1px solid var(--border); }
+.col-right { border-left: 1px solid var(--border); }
+
+/* ===== Section Headers ===== */
+.section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+}
+
+/* ===== Identity Cards ===== */
+.id-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.id-card .status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.id-card .info { flex: 1; min-width: 0; }
+.id-card .info .name { font-size: 13px; font-weight: 600; }
+.id-card .info .status-text { font-size: 11px; color: var(--text-faint); margin-top: 1px; }
+.id-card .badge-mini {
+  font-size: 10px; padding: 1px 8px; border-radius: 9px;
+  white-space: nowrap; font-weight: 600;
+}
+.dot-red-bg    { background: var(--red); }
+.dot-yellow-bg { background: var(--yellow); }
+.dot-green-bg  { background: var(--green); }
+.dot-grey-bg   { background: var(--grey); }
+.badge-red    { background: var(--red-bg); color: var(--red); }
+.badge-yellow { background: var(--yellow-bg); color: var(--yellow); }
+.badge-green  { background: var(--green-bg); color: var(--green); }
+.badge-grey   { background: var(--grey-bg); color: var(--grey); }
+
+/* ===== Feedback Summary ===== */
+.feedback-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+.feedback-box .label-row {
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 8px;
+}
+.feedback-box .msg-type {
+  font-size: 11px; font-family: var(--mono); color: var(--accent);
+  background: var(--blue-bg); padding: 2px 8px; border-radius: 4px;
+}
+.feedback-box .feedback-type {
+  font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+}
+.fb-ok     { background: var(--green-bg); color: var(--green); }
+.fb-warn   { background: var(--yellow-bg); color: var(--yellow); }
+.fb-block  { background: var(--red-bg); color: var(--red); }
+.feedback-box .summary-text { font-size: 13px; color: var(--text); }
+
+/* ===== Task Card Area (dominant) ===== */
+.task-card-area {
+  background: var(--surface-hi);
+  border: 2px solid var(--accent-dim);
+  border-radius: var(--radius);
+  padding: 16px;
+  position: relative;
+}
+.task-card-area::before {
+  content: "核心区域 · 任务卡";
+  position: absolute;
+  top: -10px;
+  left: 16px;
+  background: var(--accent-dim);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 0 10px;
+  border-radius: 4px;
+  line-height: 20px;
+}
+.task-card-content {
+  background: #1a1a2e;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text);
+  max-height: 300px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin-top: 8px;
+}
+.task-card-content .key { color: var(--accent); }
+.task-card-content .val { color: var(--green); }
+.task-card-content .comment { color: var(--text-faint); }
+
+/* ===== Buttons ===== */
+.btn-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font);
+  background: var(--surface);
+  color: var(--text);
+  transition: background 0.15s;
+}
+.btn:hover { background: var(--surface-hi); }
+.btn-primary { background: var(--accent-dim); color: #fff; border-color: var(--accent-dim); }
+.btn-primary:hover { background: var(--accent); }
+.btn-warn { background: var(--yellow-bg); color: var(--yellow); border-color: var(--yellow); }
+.btn-danger { background: var(--red-bg); color: var(--red); border-color: var(--red); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ===== Result Panel ===== */
+.result-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 12px;
+}
+.result-panel .result-header { font-weight: 700; margin-bottom: 4px; }
+.result-ok    { background: var(--green-bg); border-color: var(--green); }
+.result-warn  { background: var(--yellow-bg); border-color: var(--yellow); }
+.result-block { background: var(--red-bg); border-color: var(--red); }
+.result-not-run { background: var(--grey-bg); border-color: var(--grey); }
+
+/* ===== Tool Cards ===== */
+.tool-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  cursor: default;
+}
+.tool-card .tool-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.tool-card .tool-name { font-size: 13px; font-weight: 600; }
+.tool-card .tool-status { font-size: 11px; color: var(--text-faint); }
+.tool-card .tool-detail {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-dim);
+  display: none;
+}
+.tool-card.expanded .tool-detail { display: block; }
+.tool-card .expand-icon { font-size: 11px; color: var(--text-faint); transition: transform 0.2s; }
+.tool-card.expanded .expand-icon { transform: rotate(90deg); }
+
+/* ===== Safety Lock ===== */
+.safety-lock-bar {
+  background: var(--lock-red-bg);
+  border: 2px solid var(--lock-red);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--lock-red);
+  margin-bottom: 12px;
+}
+.safety-lock-bar .lock-icon { font-size: 20px; }
+.safety-lock-bar .lock-label { flex: 1; }
+.safety-lock-bar .lock-badge {
+  background: var(--lock-red); color: #fff;
+  padding: 2px 10px; border-radius: 10px; font-size: 11px;
+}
+
+/* ===== Debug Section ===== */
+.debug-section {
+  background: var(--purple-bg);
+  border: 1px solid var(--purple);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  margin: 16px 24px;
+}
+.debug-section .debug-header {
+  font-size: 13px; font-weight: 700; color: var(--purple);
+  display: flex; align-items: center; gap: 6px; margin-bottom: 10px;
+}
+.debug-section .debug-fields {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 16px;
+}
+.debug-section .df-key { color: var(--text-faint); }
+.debug-section .df-val { color: var(--text); word-break: break-all; }
+.debug-hidden { display: none; }
+
+/* ===== Empty/Error States ===== */
+.state-strip {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 0 24px 16px;
+}
+.state-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 14px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.state-card .state-icon { font-size: 16px; flex-shrink: 0; }
+
+/* ===== Toggle ===== */
+.toggle-row {
+  display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
+  padding: 8px 24px;
+}
+.toggle-btn {
+  padding: 4px 14px; border-radius: 12px; border: 1px solid var(--border);
+  font-size: 11px; font-weight: 600; cursor: pointer;
+  background: var(--surface); color: var(--text-dim);
+}
+.toggle-btn.active { background: var(--accent-dim); color: #fff; border-color: var(--accent-dim); }
+
+/* ===== Metadata Concept Area ===== */
+.meta-concept {
+  background: var(--surface);
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  margin-top: 4px;
+}
+.meta-concept .meta-title {
+  font-size: 12px; font-weight: 700; color: var(--text-dim); margin-bottom: 8px;
+}
+.meta-concept .meta-row {
+  font-family: var(--mono); font-size: 11px;
+  display: flex; gap: 8px; margin-bottom: 4px;
+}
+.meta-concept .meta-label { color: var(--text-faint); min-width: 120px; }
+.meta-concept .meta-val { color: var(--text-dim); word-break: break-all; }
+.meta-concept .meta-note {
+  font-size: 10px; color: var(--yellow); margin-top: 8px;
+  border-top: 1px solid var(--border); padding-top: 6px;
+}
+
+/* ===== Footnote ===== */
+.page-footnote {
+  border-top: 1px solid var(--border);
+  padding: 12px 24px;
+  font-size: 11px;
+  color: var(--text-faint);
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+/* ===== Responsive - stack on narrow ===== */
+@media (max-width: 1100px) {
+  .main-layout { grid-template-columns: 1fr; }
+  .col-left, .col-right { border: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ========== A. Page Header ========== -->
+<div class="page-header">
+  <h1>ACB 控制台静态 UI 蓝图页</h1>
+  <div class="badge-row">
+    <span class="badge badge-warn">静态脱敏设计稿</span>
+    <span class="badge badge-info">不连接 Bridge</span>
+    <span class="badge badge-fake">不执行任务</span>
+    <span class="badge badge-info">不读取真实数据</span>
+    <span class="badge badge-fake">static blueprint draft</span>
+  </div>
+</div>
+
+<!-- ========== Toggle Row ========== -->
+<div class="toggle-row">
+  <span style="font-size:12px;color:var(--text-dim);margin-right:8px;">显示模式:</span>
+  <button class="toggle-btn active" onclick="setMode('ordinary')" id="btn-ordinary">普通模式</button>
+  <button class="toggle-btn" onclick="setMode('debug')" id="btn-debug">调试模式 (演示)</button>
+</div>
+
+<!-- ========== B. Top Status Bar ========== -->
+<div class="top-bar" id="top-bar">
+  <span class="chip"><span class="dot dot-green"></span> 项目: ACB Demo Project</span>
+  <span class="chip"><span class="dot dot-green"></span> Bridge: connected / 示例</span>
+  <span class="chip"><span class="dot dot-blue"></span> 分支: master</span>
+  <span class="chip">Commit: abc1234</span>
+  <span class="chip"><span class="dot dot-green"></span> 工作区: clean</span>
+  <span class="chip" style="border-color:var(--lock-red);color:var(--lock-red);"><span class="dot dot-red"></span> 安全: locked_readonly / 只读锁定</span>
+  <span class="chip"><span class="dot dot-green"></span> 检查: ✅ ready</span>
+  <span class="chip"><span class="dot dot-yellow"></span> 检查: ⚠ warning</span>
+  <span class="chip"><span class="dot dot-red"></span> 检查: ❌ blocked</span>
+  <span class="chip"><span class="dot dot-grey"></span> 检查: not_run</span>
+</div>
+
+<!-- ========== Safety Lock Bar ========== -->
+<div style="padding:8px 24px 0;">
+  <div class="safety-lock-bar">
+    <span class="lock-icon">🔒</span>
+    <span class="lock-label">SAFETY LOCK: locked_readonly — 仅审查，禁止执行</span>
+    <span class="lock-badge">只读锁定</span>
+  </div>
+</div>
+
+<!-- ========== Main Layout ========== -->
+<div class="main-layout">
+
+  <!-- ===== C. Left: Identity Cards ===== -->
+  <div class="col-left">
+    <div class="section-title">身份卡</div>
+
+    <div class="id-card">
+      <span class="status-dot dot-red-bg"></span>
+      <div class="info"><div class="name">执行总控</div><div class="status-text">unread / urgent — 3 条未读</div></div>
+      <span class="badge-mini badge-red">urgent</span>
+    </div>
+
+    <div class="id-card">
+      <span class="status-dot dot-yellow-bg"></span>
+      <div class="info"><div class="name">UI/UX 顾问</div><div class="status-text">pending — 等待回复</div></div>
+      <span class="badge-mini badge-yellow">pending</span>
+    </div>
+
+    <div class="id-card">
+      <span class="status-dot dot-green-bg"></span>
+      <div class="info"><div class="name">测试负责人</div><div class="status-text">ready / done — 已就绪</div></div>
+      <span class="badge-mini badge-green">ready</span>
+    </div>
+
+    <div class="id-card">
+      <span class="status-dot dot-green-bg"></span>
+      <div class="info"><div class="name">合规顾问</div><div class="status-text">ready — 审核通过</div></div>
+      <span class="badge-mini badge-green">done</span>
+    </div>
+
+    <div class="id-card">
+      <span class="status-dot dot-grey-bg"></span>
+      <div class="info"><div class="name">未绑定身份卡</div><div class="status-text">unbound — 等待分配</div></div>
+      <span class="badge-mini badge-grey">unbound</span>
+    </div>
+
+    <div class="id-card" style="opacity:0.5;">
+      <span class="status-dot dot-grey-bg"></span>
+      <div class="info"><div class="name">预留身份槽位</div><div class="status-text">unbound</div></div>
+      <span class="badge-mini badge-grey">unbound</span>
+    </div>
+  </div>
+
+  <!-- ===== D. Center: Main Workflow ===== -->
+  <div class="col-center">
+
+    <!-- Feedback Summary -->
+    <div class="feedback-box">
+      <div class="label-row">
+        <span class="msg-type">messageType: task_card</span>
+        <span class="feedback-type fb-ok">feedbackType: info</span>
+        <span style="font-size:11px;color:var(--text-faint);">status: ready</span>
+        <span style="font-size:11px;color:var(--yellow);">⚠ 注意: target 验证通过</span>
+      </div>
+      <div class="summary-text">
+        当前反馈摘要: 任务卡已准备，等待发送审查。Bridge 连接正常，安全检查已通过，身份卡均已绑定。
+      </div>
+    </div>
+
+    <!-- Task Card Area (dominant) -->
+    <div class="task-card-area">
+      <div class="task-card-content">
+<span class="comment">=== ACB_TASK_CARD (sanitized demo) ===</span>
+<span class="key">taskCardId</span>: <span class="val">task_demo_20260601_001</span>
+<span class="key">target</span>: <span class="val">deepseek</span>
+<span class="key">taskTitle</span>: <span class="val">Demo: 实现示例功能模块</span>
+<span class="key">objective</span>: <span class="val">本任务卡仅用于 UI 蓝图演示，不代表真实任务。</span>
+<span class="key">background</span>: <span class="val">这是静态脱敏设计稿中的假任务卡。</span>
+<span class="key">allowedFiles</span>:
+  - <span class="val">src/modules/example/</span>
+<span class="key">forbiddenActions</span>:
+  - <span class="val">不修改 apps/browser-extension</span>
+  - <span class="val">不连接真实 Bridge</span>
+<span class="key">checks</span>:
+  - <span class="val">git status before edit</span>
+  - <span class="val">git diff after edit</span>
+<span class="key">acceptanceCriteria</span>:
+  - <span class="val">示例验收标准 1</span>
+  - <span class="val">示例验收标准 2</span>
+<span class="comment">=== END ACB_TASK_CARD ===</span></div>
+
+      <!-- Primary buttons -->
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="showResult('ok')">① 检查可发送状态</button>
+        <button class="btn" onclick="alert('静态蓝图页: 此按钮仅为 UI 展示，不执行任何操作。')">② 发送到 VS Code 查看端</button>
+        <button class="btn" onclick="alert('静态蓝图页: 此按钮仅为 UI 展示。')">③ 复制完整任务卡</button>
+        <button class="btn" onclick="alert('静态蓝图页: 此按钮仅为 UI 展示。')">④ 查看详情</button>
+      </div>
+
+      <!-- Result panels -->
+      <div id="result-area" style="margin-top:12px;">
+        <div class="result-panel result-ok">
+          <div class="result-header">✅ 可发送 — 所有检查通过</div>
+          <div>所有前置检查已通过，任务卡可以发送到 VS Code 查看端进行审查。安全锁为只读，不会自动执行。</div>
+        </div>
+        <div class="result-panel result-warn" style="margin-top:6px;">
+          <div class="result-header">⚠ 警告：建议检查后发送 — 部分检查有提示</div>
+          <div>target 字段已指定，但建议确认身份卡匹配后再发送。</div>
+        </div>
+        <div class="result-panel result-block" style="margin-top:6px;">
+          <div class="result-header">❌ 不可发送 — 阻断原因</div>
+          <div>安全锁未设为只读、身份卡未绑定、或 target 字段缺失。</div>
+        </div>
+        <div class="result-panel result-not-run" style="margin-top:6px;">
+          <div class="result-header">⚪ not_run — 尚未检查</div>
+          <div>请点击「检查可发送状态」按钮进行前置检查。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- E. Task Detail / Drawer Concept -->
+    <div class="meta-concept">
+      <div class="meta-title">📋 任务卡详情 / 元数据概念展示 (drawer concept)</div>
+
+      <div style="font-size:11px;color:var(--text-dim);margin-bottom:6px;">
+        以下展示 sourceMetadata 和 reviewMetadata 的结构概念：
+      </div>
+
+      <div class="meta-row"><span class="meta-label">sourceMessageHash:</span><span class="meta-val">hash_demo_1234567890abcdef</span></div>
+      <div class="meta-row"><span class="meta-label">contextId:</span><span class="meta-val">demo_context_id_001</span></div>
+      <div class="meta-row"><span class="meta-label">sourceMetadata.projectDir:</span><span class="meta-val">/fake/path/to/project</span></div>
+      <div class="meta-row"><span class="meta-label">sourceMetadata.branch:</span><span class="meta-val">demo-branch</span></div>
+      <div class="meta-row"><span class="meta-label">sourceMetadata.commit:</span><span class="meta-val">abc1234def5678</span></div>
+      <div class="meta-row"><span class="meta-label">reviewMetadata.reviewer:</span><span class="meta-val">执行总控</span></div>
+      <div class="meta-row"><span class="meta-label">reviewMetadata.reviewStatus:</span><span class="meta-val">pending_review</span></div>
+      <div class="meta-row"><span class="meta-label">reviewMetadata.notes:</span><span class="meta-val">示例审查备注</span></div>
+
+      <div class="meta-note">
+        ⚠ sourceMetadata / reviewMetadata 仅用于审查与诊断，不得混入 Agent 任务正文。<br>
+        ⚠ executablePayload 仅为完整 bounded ACB_TASK_CARD，不包含诊断元数据。<br>
+        ⚠ 元数据字段仅在审查阶段可见，不发送给执行 Agent。
+      </div>
+    </div>
+
+    <!-- G. Debug Mode Section -->
+    <div id="debug-section" class="debug-section debug-hidden">
+      <div class="debug-header">🔍 调试模式 — 仅开发和诊断时可见</div>
+      <div class="debug-fields">
+        <div><span class="df-key">sourceMessageHash:</span><br><span class="df-val">hash_demo_1234567890abcdef</span></div>
+        <div><span class="df-key">contextId:</span><br><span class="df-val">demo_context_id_001</span></div>
+        <div><span class="df-key">sourceMetadata.projectDir:</span><br><span class="df-val">/fake/path/to/project</span></div>
+        <div><span class="df-key">sourceMetadata.branch:</span><br><span class="df-val">demo-branch</span></div>
+        <div><span class="df-key">sourceMetadata.commit:</span><br><span class="df-val">abc1234def5678</span></div>
+        <div><span class="df-key">reviewMetadata.reviewer:</span><br><span class="df-val">执行总控</span></div>
+        <div><span class="df-key">reviewMetadata.reviewStatus:</span><br><span class="df-val">pending_review</span></div>
+        <div><span class="df-key">reviewMetadata.timestamp:</span><br><span class="df-val">2026-06-01T12:00:00Z</span></div>
+      </div>
+
+      <div style="margin-top:10px;font-size:11px;color:var(--text-dim);">
+        <div style="font-weight:700;margin-bottom:4px;">rawReport (sample):</div>
+        <pre style="font-family:var(--mono);font-size:11px;color:var(--text-faint);background:#1a1a2e;padding:8px;border-radius:4px;overflow-x:auto;">{
+  "preflight": { "git": "clean", "branch": "demo-branch", "commit": "abc1234" },
+  "identityCheck": { "bound": true, "target": "deepseek" },
+  "readiness": { "status": "ready", "warnings": [], "blocks": [] }
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== F. Right: Tool Endpoint Column ===== -->
+  <div class="col-right">
+    <div class="section-title">工具端点</div>
+
+    <!-- VS Code Bridge - expanded -->
+    <div class="tool-card expanded">
+      <div class="tool-header">
+        <span class="tool-name">VS Code Bridge</span>
+        <span class="tool-status" style="color:var(--green);">示例连接</span>
+        <span class="expand-icon">▶</span>
+      </div>
+      <div class="tool-detail">
+        <p>只读 / 查看端 · 不自动派发 · 不执行</p>
+        <p style="color:var(--yellow);margin-top:4px;">⚠ 仅用于查看任务卡，不执行任何命令</p>
+      </div>
+    </div>
+
+    <!-- Codex - collapsed -->
+    <div class="tool-card" onclick="this.classList.toggle('expanded')" style="cursor:pointer;">
+      <div class="tool-header">
+        <span class="tool-name">Codex</span>
+        <span class="tool-status">示例 / 未开放</span>
+        <span class="expand-icon">▶</span>
+      </div>
+      <div class="tool-detail">
+        <p>只读 · 不开放 · 不执行 · 不自动派发</p>
+      </div>
+    </div>
+
+    <!-- DeepSeek - collapsed -->
+    <div class="tool-card" onclick="this.classList.toggle('expanded')" style="cursor:pointer;">
+      <div class="tool-header">
+        <span class="tool-name">DeepSeek</span>
+        <span class="tool-status">示例 / 未开放</span>
+        <span class="expand-icon">▶</span>
+      </div>
+      <div class="tool-detail">
+        <p>只读 · 不开放 · 不执行 · 不自动派发</p>
+      </div>
+    </div>
+
+    <!-- Claude Code - collapsed -->
+    <div class="tool-card" onclick="this.classList.toggle('expanded')" style="cursor:pointer;">
+      <div class="tool-header">
+        <span class="tool-name">Claude Code</span>
+        <span class="tool-status">示例 / 未开放</span>
+        <span class="expand-icon">▶</span>
+      </div>
+      <div class="tool-detail">
+        <p>只读 · 不开放 · 不执行 · 不自动派发</p>
+      </div>
+    </div>
+
+    <!-- PowerShell / Git / Build Check - collapsed -->
+    <div class="tool-card" onclick="this.classList.toggle('expanded')" style="cursor:pointer;">
+      <div class="tool-header">
+        <span class="tool-name">PowerShell / Git / Build</span>
+        <span class="tool-status">示例 / 未开放</span>
+        <span class="expand-icon">▶</span>
+      </div>
+      <div class="tool-detail">
+        <p>只读检查 · 不开放 · 不执行 · 不自动派发</p>
+        <p style="color:var(--text-faint);margin-top:4px;">git status / diff 检查可在只读模式下运行</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== H. Empty / Error State Examples ========== -->
+<div style="padding:0 24px;margin-top:4px;">
+  <div class="section-title">状态示例 — 边界情况与错误状态</div>
+</div>
+<div class="state-strip">
+  <div class="state-card"><span class="state-icon">📭</span> 暂无捕获消息</div>
+  <div class="state-card"><span class="state-icon">📋</span> 无完整任务卡</div>
+  <div class="state-card"><span class="state-icon">🔌</span> Bridge 未连接</div>
+  <div class="state-card"><span class="state-icon">⚠️</span> 项目元数据不匹配</div>
+  <div class="state-card" style="border-color:var(--red);color:var(--red);"><span class="state-icon">🚫</span> readiness: blocked</div>
+  <div class="state-card" style="border-color:var(--yellow);color:var(--yellow);"><span class="state-icon">⚡</span> 身份卡未绑定 — 无法派发</div>
+  <div class="state-card"><span class="state-icon">🔒</span> safetyLock: locked_readonly</div>
+</div>
+
+<!-- ========== Page Footnote ========== -->
+<div class="page-footnote">
+  <span>ACB 控制台静态 UI 蓝图页 · static blueprint draft · 2026-06-01</span>
+  <span>仅用于设计评审与截图标注 · 不连接任何外部服务</span>
+</div>
+
+<!-- ========== Minimal Static JS ========== -->
+<script>
+function setMode(mode) {
+  var ds = document.getElementById('debug-section');
+  var bo = document.getElementById('btn-ordinary');
+  var bd = document.getElementById('btn-debug');
+  if (mode === 'debug') {
+    ds.classList.remove('debug-hidden');
+    bo.classList.remove('active');
+    bd.classList.add('active');
+  } else {
+    ds.classList.add('debug-hidden');
+    bd.classList.remove('active');
+    bo.classList.add('active');
+  }
+}
+
+function showResult(type) {
+  var results = document.querySelectorAll('#result-area .result-panel');
+  results.forEach(function(r) {
+    if (type === 'ok' && r.classList.contains('result-ok')) {
+      r.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      r.style.boxShadow = '0 0 0 3px var(--accent)';
+      setTimeout(function() { r.style.boxShadow = ''; }, 1500);
+    }
+  });
+}
+</script>
+
+</body>
+</html>

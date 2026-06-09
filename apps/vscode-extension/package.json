@@ -1,0 +1,75 @@
+{
+  "name": "acb-vscode-extension",
+  "displayName": "ACB - AI Control Bridge",
+  "description": "ACB VS Code extension for project status awareness and local project control bridge.",
+  "version": "0.1.0",
+  "publisher": "acb",
+  "license": "Apache-2.0",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:acb.showProjectStatus",
+    "onCommand:acb.copyProjectStatusSummary",
+    "onCommand:acb.showExecutionInbox"
+  ],
+  "main": "./src/extension.js",
+  "scripts": {
+    "test:project-status": "node test/test-project-status.js",
+    "test:bridge": "node test/test-bridge.js"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "acb.showProjectStatus",
+        "title": "ACB: Show Project Status"
+      },
+      {
+        "command": "acb.copyProjectStatusSummary",
+        "title": "ACB: Copy Project Status Summary"
+      },
+      {
+        "command": "acb.showExecutionInbox",
+        "title": "ACB: Show Execution Inbox"
+      }
+    ],
+    "configuration": {
+      "title": "ACB",
+      "properties": {
+        "acb.executorProfiles.codex.terminalName": {
+          "type": "string",
+          "default": "ACB Codex",
+          "description": "Terminal name used by ACB for the Codex executor profile."
+        },
+        "acb.executorProfiles.codex.launchCommand": {
+          "type": "string",
+          "default": "codex",
+          "description": "Command sent only when the user explicitly starts the Codex executor terminal."
+        },
+        "acb.executorProfiles.claude-code.terminalName": {
+          "type": "string",
+          "default": "ACB Claude Code",
+          "description": "Terminal name used by ACB for the Claude Code executor profile."
+        },
+        "acb.executorProfiles.claude-code.launchCommand": {
+          "type": "string",
+          "default": "claude",
+          "description": "Command sent only when the user explicitly starts the Claude Code executor terminal."
+        },
+        "acb.executorProfiles.deepseek.terminalName": {
+          "type": "string",
+          "default": "ACB DeepSeek",
+          "description": "Optional terminal name used by ACB for the DeepSeek executor profile."
+        },
+        "acb.executorProfiles.deepseek.launchCommand": {
+          "type": "string",
+          "default": "",
+          "description": "Optional command sent only when the user explicitly starts the DeepSeek executor terminal. Empty by default because no safe command is assumed."
+        }
+      }
+    }
+  }
+}

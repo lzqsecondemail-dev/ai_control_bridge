@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M3-UI.2-A-0 当前正式控制台状态复刻</title>
+<style>
+/* ===== Reset ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ===== Variables ===== */
+:root {
+  --bg: #f8fafc;
+  --surface: #fff;
+  --surface-hi: #f9fafb;
+  --border: #e5e7eb;
+  --text: #0f172a;
+  --text-dim: #475569;
+  --text-faint: #94a3b8;
+  --accent: #2563eb;
+  --accent-dim: #4338ca;
+  --green: #16a34a;
+  --green-bg: #dcfce7;
+  --yellow: #b45309;
+  --yellow-bg: #fef3c7;
+  --red: #dc2626;
+  --red-bg: #fee2e2;
+  --grey: #6b7280;
+  --grey-bg: #f1f5f9;
+  --lock-red: #c2410c;
+  --lock-red-bg: #fff7ed;
+  --blue: #1d4ed8;
+  --blue-bg: #eff6ff;
+  --purple: #7c3aed;
+  --purple-bg: #faf5ff;
+  --radius: 6px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --mono: "SF Mono", "Cascadia Code", "Consolas", "Microsoft YaHei Mono", monospace;
+}
+
+body {
+  font-family: var(--font);
+  background: #f1f5f9;
+  color: var(--text);
+  line-height: 1.5;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+/* ===== Page Header ===== */
+.page-header {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+.page-header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.page-header .subtitle {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+.page-header .badge-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid;
+}
+.badge-warn { background: var(--yellow-bg); color: var(--yellow); border-color: var(--yellow); }
+.badge-info { background: var(--blue-bg); color: var(--blue); border-color: var(--blue); }
+.badge-red  { background: var(--red-bg); color: var(--red); border-color: var(--red); }
+.badge-grey { background: var(--grey-bg); color: var(--grey); border-color: var(--grey); }
+
+/* ===== Console Mock Surface ===== */
+.console-shell {
+  background: var(--surface);
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+/* Console Header (matching real floating console) */
+.console-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: #333;
+  color: #fff;
+  flex-shrink: 0;
+}
+.console-header .title {
+  font-size: 15px;
+  font-weight: bold;
+}
+.console-header .close-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+/* Action Bar */
+.console-action-bar {
+  display: flex;
+  gap: 6px;
+  padding: 6px 12px;
+  border-bottom: 1px solid #e0e0e0;
+  flex-wrap: wrap;
+  align-items: center;
+  background: #fafafa;
+  justify-content: space-between;
+}
+.console-action-bar .action-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.console-action-bar .mode-switch-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+.action-btn {
+  padding: 3px 9px;
+  border: 1px solid #bbb;
+  border-radius: 999px;
+  background: #fff;
+  color: #374151;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: Arial, sans-serif;
+}
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.mode-btn {
+  padding: 3px 8px;
+  border: 1px solid #2563eb;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+}
+.mode-btn.active {
+  background: #2563eb;
+  color: #fff;
+}
+.mode-btn.inactive {
+  background: #fff;
+  color: #2563eb;
+}
+
+/* Status bar below header */
+.console-status-bar {
+  padding: 4px 16px;
+  font-size: 11px;
+  color: #888;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* ===== Main Layout ===== */
+.console-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  overflow: hidden;
+}
+
+/* Top Overview / Project Status Strip */
+.top-overview {
+  padding: 6px 8px;
+  border: 1px solid #dbeafe;
+  background: #eff6ff;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.top-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  min-width: 0;
+}
+.top-chip {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+}
+.top-chip-bridge { background: #dcfce7; color: #0f172a; }
+.top-chip-project { background: #dbeafe; color: #0f172a; }
+.top-chip-branch { background: #ede9fe; color: #0f172a; }
+.top-chip-commit { background: #f5f3ff; color: #0f172a; }
+.top-chip-tree { background: #fef3c7; color: #0f172a; }
+.top-chip-safety { background: #fee2e2; color: #0f172a; }
+.top-chip-preflight { background: #ede9fe; color: #0f172a; }
+.top-chip-readiness { background: #fef3c7; color: #0f172a; }
+.top-chip-review { background: #ccfbf1; color: #0f172a; }
+.safety-flags-line {
+  margin: 6px 0 0 0;
+  font-size: 11px;
+  color: #475569;
+}
+.top-actions {
+  display: flex;
+  gap: 5px;
+  flex-wrap: nowrap;
+  align-items: center;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* Three-column grid */
+.three-col {
+  display: grid;
+  grid-template-columns: minmax(240px, 26%) minmax(420px, 48%) minmax(240px, 26%);
+  gap: 10px;
+  flex: 1;
+  min-height: 0;
+}
+.col-left, .col-center, .col-right {
+  min-height: 0;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+/* Section blocks */
+.section-block {
+  margin-bottom: 14px;
+  padding: 10px;
+  background: #f8f8f8;
+  border-radius: 4px;
+  border: 1px solid #e8e8e8;
+}
+.section-block h3 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  color: #555;
+}
+.section-block.classification-box {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+.section-block.safety-box {
+  background: #fff7ed;
+  border-color: #fdba74;
+}
+.section-block.safety-box h3 {
+  color: #9a3412;
+}
+.section-block.tool-box {
+  background: #f8fafc;
+  border-color: #e5e7eb;
+}
+.section-block.tool-box h3 {
+  color: #374151;
+}
+.section-block.action-steps-box {
+  margin-top: 10px;
+  padding: 8px;
+  border: 1px dashed #ef4444;
+  background: #fef2f2;
+  border-radius: 4px;
+}
+.section-block.action-steps-box .steps-title {
+  margin: 0 0 6px 0;
+  font-size: 12px;
+  color: #7f1d1d;
+  font-weight: bold;
+}
+.section-block.action-steps-box .steps-tip {
+  margin: 0 0 6px 0;
+  font-size: 12px;
+  color: #7f1d1d;
+}
+
+/* Feedback rows */
+.feedback-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 2px;
+  font-size: 12px;
+}
+.feedback-row .fb-label {
+  color: #6b7280;
+  min-width: 90px;
+  flex-shrink: 0;
+}
+.feedback-row .fb-value {
+  color: #0f172a;
+  word-break: break-all;
+}
+
+/* Status action buttons */
+.status-actions {
+  display: none;
+  gap: 6px;
+  margin: 4px 0 8px 0;
+  flex-wrap: wrap;
+}
+.status-actions.visible {
+  display: flex;
+}
+.status-btn {
+  padding: 3px 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 11px;
+}
+.status-btn.seen { background: #6b7280; }
+.status-btn.pending { background: #f59e0b; }
+.status-btn.done { background: #10b981; }
+
+/* Channel cards */
+.channel-card {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px;
+  margin-bottom: 8px;
+  background: #fff;
+  cursor: default;
+}
+.channel-card.selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+.channel-card.pinned {
+  box-shadow: inset 3px 0 0 #dc2626;
+}
+.channel-card .ch-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.channel-card .ch-name {
+  font-size: 12px;
+  color: #111827;
+  font-weight: bold;
+}
+.channel-card .ch-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.channel-card p {
+  margin: 6px 0 2px 0;
+  font-size: 11px;
+  color: #4b5563;
+}
+.channel-card .ch-select-btn {
+  padding: 4px 10px;
+  border: 1px solid #2563eb;
+  border-radius: 4px;
+  background: #fff;
+  color: #2563eb;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+/* Message preview area */
+.msg-pre {
+  margin: 0;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  font-size: 11px;
+  max-height: 80px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* Classification form */
+.class-form select, .class-form input, .class-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.class-form textarea { resize: vertical; }
+.class-form label {
+  display: block;
+  font-size: 12px;
+  margin: 6px 0 4px 0;
+}
+
+/* Action feedback panel */
+.action-feedback-panel {
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #e2e8f0;
+}
+.action-feedback-panel .af-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.action-feedback-panel .af-title {
+  font-size: 12px;
+  color: #0f172a;
+  font-weight: bold;
+}
+.action-feedback-panel .af-level {
+  font-size: 11px;
+  color: #1f2937;
+}
+.action-feedback-panel .af-message {
+  margin: 6px 0 2px 0;
+  font-size: 12px;
+  color: #1f2937;
+}
+.action-feedback-panel .af-detail {
+  margin: 0;
+  font-size: 11px;
+  color: #475569;
+}
+.action-feedback-panel .af-time {
+  margin: 4px 0 0 0;
+  font-size: 11px;
+  color: #64748b;
+}
+.af-ok    { border-color: #16a34a; background: #dcfce7; }
+.af-warn  { border-color: #b45309; background: #fef3c7; }
+.af-error { border-color: #dc2626; background: #fee2e2; }
+.af-info  { border-color: #cbd5e1; background: #e2e8f0; }
+
+/* Tool endpoint cards */
+.tool-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 8px;
+  background: #fff;
+  margin-bottom: 8px;
+}
+.tool-card .t-name {
+  font-size: 12px;
+  font-weight: bold;
+  color: #111827;
+  margin: 0 0 4px 0;
+}
+.tool-card .t-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+.tool-card .t-line {
+  margin: 0 0 3px 0;
+  font-size: 11px;
+  color: #4b5563;
+}
+.tool-card .t-note {
+  margin: 0;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+/* Action Step cards */
+.step-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
+  margin-top: 8px;
+  padding: 10px;
+}
+.step-card .st-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.step-card .st-num {
+  font-size: 12px;
+  font-weight: bold;
+  color: #374151;
+}
+.step-card .st-badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  color: #fff;
+}
+.step-card .st-title {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  color: #374151;
+}
+.step-card .st-source {
+  margin: 0 0 4px 0;
+  font-size: 11px;
+  color: #4b5563;
+}
+.step-card .st-status-line {
+  margin: 0 0 8px 0;
+  font-size: 11px;
+  color: #1f2937;
+}
+.step-card .st-missing {
+  margin: 0 0 6px 0;
+  font-size: 11px;
+  color: #dc2626;
+}
+.step-btn-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.step-btn {
+  padding: 3px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: Arial, sans-serif;
+}
+.step-btn-primary {
+  border: 1px solid #4338ca;
+  background: #4338ca;
+  color: #fff;
+  font-weight: bold;
+}
+.step-btn-send {
+  border: 1px solid #0f766e;
+  background: #0f766e;
+  color: #fff;
+}
+.step-btn-copy {
+  border: 1px solid #16a34a;
+  background: #16a34a;
+  color: #fff;
+}
+.step-btn-detail {
+  border: 1px solid #1976d2;
+  background: #fff;
+  color: #1976d2;
+}
+.step-btn:disabled, .step-btn.disabled {
+  border-color: #9ca3af;
+  background: #e5e7eb;
+  color: #6b7280;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+.step-reason {
+  font-size: 11px;
+  color: #6b7280;
+}
+.step-reason.error { color: #dc2626; }
+
+/* Payload detail inline panel */
+.payload-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid #dbeafe;
+  border-radius: 6px;
+  background: #f8fbff;
+  padding: 8px;
+  min-height: 100px;
+  max-height: 240px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.payload-inline .pd-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.payload-inline .pd-title {
+  font-size: 12px;
+  color: #1e3a8a;
+  font-weight: bold;
+}
+.payload-inline .pd-meta {
+  display: flex;
+  gap: 10px;
+  padding: 4px 0;
+  border-bottom: 1px solid #e0e0e0;
+  background: #fafafa;
+  flex-wrap: wrap;
+  font-size: 11px;
+  color: #475569;
+}
+.payload-inline .pd-content {
+  flex: 1;
+  padding: 10px;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-family: Consolas, monospace;
+  font-size: 11px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 120px;
+  overflow-y: auto;
+}
+.payload-inline .pd-footer {
+  display: flex;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid #e0e0e0;
+  align-items: center;
+}
+
+/* Bridge/details sections */
+.bridge-section {
+  margin-bottom: 14px;
+  padding: 10px;
+  background: #f0fdf4;
+  border-radius: 4px;
+  border: 1px solid #bbf7d0;
+}
+.bridge-section h3 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  color: #166534;
+}
+.preflight-section {
+  margin-bottom: 14px;
+  padding: 10px;
+  background: #faf5ff;
+  border-radius: 4px;
+  border: 1px solid #e9d5ff;
+}
+.preflight-section h3 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  color: #7c3aed;
+}
+.readiness-section {
+  margin-bottom: 14px;
+  padding: 10px;
+  background: #fef9c3;
+  border-radius: 4px;
+  border: 1px solid #fde047;
+}
+.readiness-section h3 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  color: #a16207;
+}
+.project-section {
+  margin-bottom: 14px;
+  padding: 10px;
+  background: #eff6ff;
+  border-radius: 4px;
+  border: 1px solid #bfdbfe;
+}
+.project-section h3 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  color: #1e40af;
+}
+
+/* Report section */
+.report-section {
+  margin-top: 14px;
+}
+.report-section h3 {
+  margin: 0 0 6px 0;
+  font-size: 13px;
+  color: #555;
+}
+.report-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  font-family: Consolas, monospace;
+  font-size: 11px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+  background: #fdfdfd;
+}
+
+/* Debug sections (hidden by default) */
+.debug-hidden { display: none; }
+.debug-visible { display: block; }
+
+/* Expandable details */
+details { cursor: pointer; }
+details summary {
+  font-size: 12px;
+  color: #334155;
+}
+
+/* ===== Inventory Table ===== */
+.inventory-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+.inventory-section h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+.inventory-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.inventory-table th, .inventory-table td {
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+.inventory-table th {
+  background: var(--surface-hi);
+  font-weight: 700;
+  color: var(--text-dim);
+  font-size: 11px;
+}
+.inventory-table td code {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: #f1f5f9;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+/* ===== Checklist Section ===== */
+.checklist-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+.checklist-section h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.checklist-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.checklist-table th, .checklist-table td {
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  text-align: left;
+}
+.checklist-table th {
+  background: var(--surface-hi);
+  font-weight: 700;
+  color: var(--text-dim);
+}
+.check-input {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+/* ===== Not-Decide Section ===== */
+.not-decide-section {
+  background: var(--surface);
+  border: 1px solid var(--red);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+.not-decide-section h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--red);
+  margin-bottom: 10px;
+}
+.not-decide-section ul {
+  list-style: disc;
+  padding-left: 20px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.not-decide-section ul li {
+  margin-bottom: 4px;
+}
+
+/* ===== Observations Section ===== */
+.observations-section {
+  background: var(--surface);
+  border: 1px solid var(--yellow);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+.observations-section h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--yellow);
+  margin-bottom: 10px;
+}
+.observations-section ul {
+  list-style: disc;
+  padding-left: 20px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.observations-section ul li {
+  margin-bottom: 4px;
+}
+
+/* ===== Footnote ===== */
+.page-footnote {
+  text-align: center;
+  padding: 12px 20px;
+  font-size: 11px;
+  color: var(--text-faint);
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+}
+
+/* ===== Safety Lock Banner ===== */
+.safety-lock-banner {
+  background: #fff7ed;
+  border: 2px solid #c2410c;
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  color: #9a3412;
+  margin-bottom: 10px;
+}
+.safety-lock-banner .lock-label { flex: 1; }
+.safety-lock-banner .lock-badge {
+  background: #c2410c;
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .three-col { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ========================================================================== -->
+<!-- A. HEADER / PURPOSE NOTE                                                   -->
+<!-- ========================================================================== -->
+<div class="page-header">
+  <h1>M3-UI.2-A-0 当前正式控制台状态复刻</h1>
+  <div class="subtitle">
+    静态脱敏现状基准，不连接 Bridge，不读取真实数据，不执行任务。<br>
+    本页只用于校验执行端是否理解当前 UI，不代表下一版本目标。<br>
+    现有长期静态蓝图页（acb_console_ui_blueprint.html）不是本页的直接基准，本页仅根据当前生产代码（mock-listener.js）重建当前状态。
+  </div>
+  <div class="badge-row">
+    <span class="badge badge-warn">静态脱敏现状基准</span>
+    <span class="badge badge-info">不连接 Bridge</span>
+    <span class="badge badge-info">不读取真实数据</span>
+    <span class="badge badge-red">不执行任务</span>
+    <span class="badge badge-grey">仅校验 UI 理解</span>
+  </div>
+</div>
+
+<!-- ========================================================================== -->
+<!-- B. CURRENT CONSOLE MOCK SURFACE                                            -->
+<!-- ========================================================================== -->
+<div class="console-shell" id="console-mock">
+
+  <!-- Console Header -->
+  <div class="console-header">
+    <span class="title">ACB 控制台 / M3-UI.0</span>
+    <button class="close-btn" type="button" disabled>X</button>
+  </div>
+
+  <!-- Action Bar with Mode Switch -->
+  <div class="console-action-bar">
+    <div class="action-group">
+      <button class="action-btn">刷新</button>
+      <button class="action-btn">导出测试报告</button>
+      <button class="action-btn">测试本地 Bridge</button>
+      <button class="action-btn">刷新本地项目状态</button>
+      <button class="action-btn">检查执行准备状态</button>
+      <button class="action-btn" disabled style="opacity:0.6">采集当前对话 (mock)</button>
+    </div>
+    <div class="mode-switch-wrap">
+      <span style="font-size:12px;color:#475569;">显示模式:</span>
+      <button class="mode-btn active" id="btn-normal" onclick="setMode('normal')">普通模式</button>
+      <button class="mode-btn inactive" id="btn-debug" onclick="setMode('debug')">调试模式</button>
+      <span id="debug-hint" style="font-size:11px;color:#b45309;display:none;">调试信息已展开</span>
+    </div>
+  </div>
+
+  <!-- Status Bar -->
+  <div class="console-status-bar">就绪</div>
+
+  <!-- Console Body -->
+  <div class="console-body">
+
+    <!-- === Top Status Overview (项目状态) === -->
+    <div class="top-overview">
+      <div class="top-strip">
+        <span class="top-chip top-chip-project">项目: <strong id="top-project">ACB Workspace (sanitized)</strong></span>
+        <span class="top-chip top-chip-bridge">
+          Bridge: <strong id="top-bridge">connected (sanitized)</strong>
+          <button class="action-btn" style="margin-left:4px;padding:1px 6px;font-size:10px;">刷新</button>
+        </span>
+        <span class="top-chip top-chip-branch">分支: <strong id="top-branch">master</strong></span>
+        <span class="top-chip top-chip-commit">Commit: <strong id="top-commit">c7d4f37</strong></span>
+        <span class="top-chip top-chip-tree">工作树: <strong id="top-tree">clean (sanitized)</strong></span>
+        <span class="top-chip top-chip-safety">安全: <strong id="top-safety">locked_readonly / 只读锁定</strong></span>
+        <span class="top-chip top-chip-preflight">预检: <strong id="top-preflight">not_run (sanitized)</strong></span>
+        <span class="top-chip top-chip-readiness">就绪: <strong id="top-readiness">not_run (sanitized)</strong></span>
+        <span class="top-chip top-chip-review">审查: <strong id="top-review">not_sent (sanitized)</strong></span>
+        <div class="top-actions">
+          <button class="action-btn">刷新项目状态</button>
+          <button class="action-btn" disabled>设置（未开放）</button>
+          <button class="action-btn" disabled>只读锁定入口</button>
+          <button class="action-btn">更多信息</button>
+        </div>
+      </div>
+      <p class="safety-flags-line">
+        安全状态: <strong>locked_readonly / 只读锁定</strong> · Exec=false · Agent=false · Cmd=false · Git=false
+      </p>
+      <!-- More info (collapsed) -->
+      <details style="margin-top:4px;">
+        <summary>更多项目信息</summary>
+        <div style="margin-top:6px;">
+          <div class="feedback-row"><span class="fb-label">项目路径:</span><span class="fb-value">/fake/path/to/project (sanitized)</span></div>
+          <div class="feedback-row"><span class="fb-label">Git Root:</span><span class="fb-value">/fake/path/.git (sanitized)</span></div>
+          <div class="feedback-row"><span class="fb-label">Selected Channel:</span><span class="fb-value">执行总控 (execution-controller)</span></div>
+          <div class="feedback-row"><span class="fb-label">Selected Status:</span><span class="fb-value">unread (sanitized)</span></div>
+          <div class="feedback-row"><span class="fb-label">Selected Hash:</span><span class="fb-value">f1a2b3c4d5 (sanitized)</span></div>
+          <div class="feedback-row"><span class="fb-label">刷新时间:</span><span class="fb-value">2026-06-01T12:00:00Z (sanitized)</span></div>
+        </div>
+      </details>
+    </div>
+
+    <!-- === Three-Column Layout === -->
+    <div class="three-col">
+
+      <!-- ===== LEFT COLUMN: Identity Cards ===== -->
+      <div class="col-left">
+
+        <!-- Channel List -->
+        <div class="section-block">
+          <h3>GPT 身份卡</h3>
+
+          <!-- Channel 1: 执行总控 (selected, pinned) -->
+          <div class="channel-card selected pinned">
+            <div class="ch-head">
+              <span class="ch-name">执行总控</span>
+              <span class="ch-dot" style="background:#e53935;"></span>
+            </div>
+            <p>roleType: controller</p>
+            <p>binding: 当前页面已绑定 (sanitized)</p>
+            <p>lastCapturedAt: 2026-06-01T11:55:00Z (sanitized)</p>
+            <p>hash: f1a2b3c4d5 (sanitized)</p>
+            <p>sourceConversationId: c_demo_conv_ctrl (sanitized)</p>
+            <button class="ch-select-btn">当前已选中</button>
+          </div>
+
+          <!-- Channel 2: 工程参谋 -->
+          <div class="channel-card">
+            <div class="ch-head">
+              <span class="ch-name">工程参谋</span>
+              <span class="ch-dot" style="background:#f59e0b;"></span>
+            </div>
+            <p>roleType: advisor</p>
+            <p>binding: 未绑定</p>
+            <p>lastCapturedAt: 2026-06-01T10:30:00Z (sanitized)</p>
+            <p>hash: e5d4c3b2a1 (sanitized)</p>
+            <p>sourceConversationId: 未绑定</p>
+            <button class="ch-select-btn">选择此身份卡</button>
+          </div>
+
+          <!-- Channel 3: 测试参谋 -->
+          <div class="channel-card">
+            <div class="ch-head">
+              <span class="ch-name">测试参谋</span>
+              <span class="ch-dot" style="background:#d1d5db;"></span>
+            </div>
+            <p>roleType: advisor</p>
+            <p>binding: 未绑定</p>
+            <p>lastCapturedAt: unknown</p>
+            <p>hash: unknown</p>
+            <p>sourceConversationId: 未绑定</p>
+            <button class="ch-select-btn">选择此身份卡</button>
+          </div>
+
+          <!-- Channel 4: 安全参谋 -->
+          <div class="channel-card">
+            <div class="ch-head">
+              <span class="ch-name">安全参谋</span>
+              <span class="ch-dot" style="background:#d1d5db;"></span>
+            </div>
+            <p>roleType: advisor</p>
+            <p>binding: 未绑定</p>
+            <p>lastCapturedAt: unknown</p>
+            <p>hash: unknown</p>
+            <p>sourceConversationId: 未绑定</p>
+            <button class="ch-select-btn">选择此身份卡</button>
+          </div>
+
+          <!-- Channel 5: UI/UX 参谋 -->
+          <div class="channel-card">
+            <div class="ch-head">
+              <span class="ch-name">UI/UX 参谋</span>
+              <span class="ch-dot" style="background:#d1d5db;"></span>
+            </div>
+            <p>roleType: advisor</p>
+            <p>binding: 未绑定</p>
+            <p>lastCapturedAt: unknown</p>
+            <p>hash: unknown</p>
+            <p>sourceConversationId: 未绑定</p>
+            <button class="ch-select-btn">选择此身份卡</button>
+          </div>
+
+          <!-- Identity Controls -->
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 0 0;">
+            <button class="action-btn" disabled>新建身份卡（未开放）</button>
+            <button class="action-btn">绑定当前页面到此卡</button>
+            <button class="action-btn">打开原对话</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== CENTER COLUMN: Current Message / Task / Action ===== -->
+      <div class="col-center">
+
+        <!-- Current Feedback / Task Card -->
+        <div class="section-block">
+          <h3>当前消息 / 任务卡</h3>
+          <div class="feedback-row"><span class="fb-label">通道 ID:</span><span class="fb-value">execution-controller</span></div>
+          <div class="feedback-row"><span class="fb-label">通道名称:</span><span class="fb-value">执行总控</span></div>
+          <div class="feedback-row"><span class="fb-label">通道类型:</span><span class="fb-value">controller</span></div>
+          <div class="feedback-row"><span class="fb-label">是否有反馈:</span><span class="fb-value">true</span></div>
+          <div class="feedback-row"><span class="fb-label">通道状态:</span><span class="fb-value">unread (sanitized)</span></div>
+          <div class="feedback-row" id="row-conversation-id"><span class="fb-label">sourceConversationId:</span><span class="fb-value">c_demo_conv_ctrl (sanitized)</span></div>
+          <div class="feedback-row" id="row-source-url"><span class="fb-label">sourceUrl:</span><span class="fb-value">https://example.com/mock-chatgpt.html (sanitized)</span></div>
+          <div class="feedback-row"><span class="fb-label">消息预览:</span><span class="fb-value">M3-UI.2-A-0 当前正式控制台状态复刻任务卡 (sanitized)</span></div>
+
+          <!-- Status action buttons -->
+          <div class="status-actions visible" style="margin:4px 0 8px 0;">
+            <button class="status-btn seen">标为已读</button>
+            <button class="status-btn pending">标为挂起</button>
+            <button class="status-btn done">标为完成</button>
+          </div>
+
+          <!-- Feedback actions -->
+          <div style="display:flex;gap:6px;margin:4px 0 8px 0;flex-wrap:wrap;">
+            <button class="action-btn">打开原对话</button>
+            <button class="action-btn">重新采集到此卡</button>
+          </div>
+
+          <div class="feedback-row"><span class="fb-label">采集时间:</span><span class="fb-value">2026-06-01T11:55:00Z (sanitized)</span></div>
+          <div class="feedback-row" id="row-hash"><span class="fb-label">哈希值:</span><span class="fb-value">f1a2b3c4d5... (sanitized)</span></div>
+
+          <p style="margin:6px 0 2px 0;font-size:12px;"><strong>最新用户消息:</strong></p>
+          <pre class="msg-pre" id="last-user">创建 M3-UI.2-A-0 当前控制台状态静态基线 (sanitized fake user message)</pre>
+
+          <p style="margin:6px 0 2px 0;font-size:12px;"><strong>最新助手消息:</strong></p>
+          <pre class="msg-pre" id="last-assistant">&lt;ACB_TASK_CARD id="task_demo_m3ui2a0" target="deepseek" version="1"&gt;
+taskCardId: task_demo_m3ui2a0
+target: deepseek
+taskTitle: 创建 M3-UI.2-A-0 当前控制台状态静态基线
+(sanitized fake assistant message - 脱敏假数据)
+&lt;ACB_TASK_CARD_END id="task_demo_m3ui2a0"&gt;</pre>
+        </div>
+
+        <!-- Current Feedback Classification -->
+        <div class="section-block classification-box" id="classification-box">
+          <h3>当前反馈类型</h3>
+          <div class="feedback-row"><span class="fb-label">分类检测到:</span><span class="fb-value">true</span></div>
+          <div class="feedback-row"><span class="fb-label">类型:</span><span class="fb-value">执行 (execution)</span></div>
+          <div class="feedback-row"><span class="fb-label">标题:</span><span class="fb-value">M3-UI.2-A-0 当前控制台状态复刻 (sanitized)</span></div>
+          <div class="feedback-row"><span class="fb-label">摘要:</span><span class="fb-value">创建当前控制台状态静态基线页 (sanitized)</span></div>
+          <div class="feedback-row"><span class="fb-label">默认浏览行为:</span><span class="fb-value">actionRequired 需要行动</span></div>
+          <div class="feedback-row"><span class="fb-label">推荐状态:</span><span class="fb-value">action_required 需要行动</span></div>
+          <div class="feedback-row"><span class="fb-label">关注级别:</span><span class="fb-value">urgent 紧急</span></div>
+          <div class="feedback-row"><span class="fb-label">是否需要执行:</span><span class="fb-value">是</span></div>
+          <div class="feedback-row"><span class="fb-label">建议下一步:</span><span class="fb-value">prepare_execution</span></div>
+          <div class="feedback-row"><span class="fb-label">置信度:</span><span class="fb-value">medium</span></div>
+          <div class="feedback-row"><span class="fb-label">来源:</span><span class="fb-value">fallback_rule 本地规则</span></div>
+          <div class="feedback-row"><span class="fb-label">用户已编辑:</span><span class="fb-value">false</span></div>
+
+          <!-- Classification Editor -->
+          <h4 style="margin:10px 0 8px 0;font-size:12px;color:#555;">编辑分类</h4>
+          <div class="class-form">
+            <label>反馈类型 (feedbackType)</label>
+            <select><option>execution 执行</option><option>content 内容</option><option>decision 判断</option><option>strategy 战略</option><option>recommendation 建议</option></select>
+            <label>标题 (title)</label>
+            <input type="text" value="M3-UI.2-A-0 当前控制台状态复刻 (sanitized)">
+            <label>摘要 (summary)</label>
+            <textarea rows="3">创建当前控制台状态静态基线页 (sanitized)</textarea>
+            <label>默认行为 (defaultBehavior)</label>
+            <select><option>actionRequired 需要行动</option><option>autoRead 浏览后已读</option><option>pendingReview 挂起待复核</option><option>pendingDecision 挂起待决策</option><option>noChange 不改变状态</option></select>
+            <label>推荐状态 (recommendedStatus)</label>
+            <select><option>action_required 需要行动</option><option>seen 已读</option><option>pending 挂起</option><option>done 已完成</option><option>archived 已归档</option></select>
+            <label>关注级别 (attentionLevel)</label>
+            <select><option>urgent 紧急</option><option>low 低</option><option>medium 中</option><option>high 高</option><option>done 完成</option></select>
+            <label>需要执行 (needsExecution)</label>
+            <select><option>true 是</option><option>false 否</option></select>
+            <label>建议下一步 (suggestedNextAction)</label>
+            <input type="text" value="prepare_execution">
+            <label>置信度 (confidence)</label>
+            <select><option>medium</option><option>low</option><option>high</option></select>
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+              <button class="action-btn">保存分类</button>
+              <button class="action-btn">重置为自动识别</button>
+            </div>
+          </div>
+
+          <!-- === Action Steps Section === -->
+          <div class="section-block action-steps-box" id="action-steps-box">
+            <p class="steps-title">动作步骤</p>
+            <p class="steps-tip" id="steps-tip">该反馈需要执行，可生成本地动作步骤草稿。</p>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <button class="action-btn" id="gen-steps-btn" style="display:inline-block;border:1px solid #dc2626;color:#dc2626;font-weight:bold;">生成动作步骤</button>
+              <span style="font-size:11px;color:#6b7280;">计划状态: <strong>draft</strong></span>
+            </div>
+
+            <!-- Step 1 -->
+            <div class="step-card" id="step-1">
+              <div class="st-header">
+                <span class="st-num">第 1 步</span>
+                <span class="st-badge" style="background:#6366f1;">DeepSeek</span>
+                <span class="st-badge" style="background:#16a34a;">完整</span>
+                <span class="st-badge" style="background:#16a34a;">可发送</span>
+              </div>
+              <p class="st-title">执行 ACB_TASK_CARD: task_demo_m3ui2a0 (sanitized)</p>
+              <p class="st-source">来源: 执行总控 | channelId: execution-controller</p>
+              <p class="st-source" id="step-1-debug-source" style="display:none;">hash: f1a2b3c4d5 | capturedAt: 2026-06-01T11:55:00Z | step: 1 | taskCardId: task_demo_m3ui2a0</p>
+              <p class="st-status-line">payloadStatus: complete | canSendToAgent: true | preflightStatus: not_run | readinessStatus: not_run | sendStatus: none</p>
+              <div class="step-btn-row">
+                <button class="step-btn step-btn-primary">检查可发送状态</button>
+                <button class="step-btn step-btn-send">发送到 VS Code 查看端</button>
+                <button class="step-btn step-btn-copy">复制给 DeepSeek</button>
+                <button class="step-btn step-btn-detail" onclick="togglePayloadDetail()">查看详情</button>
+                <span style="margin-left:6px;font-size:11px;color:#16a34a;">可发送</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- === Unified Action Feedback Panel === -->
+          <div class="action-feedback-panel af-info" id="action-feedback-panel">
+            <div class="af-header">
+              <span class="af-title">检查与操作结果</span>
+              <span class="af-level">信息</span>
+            </div>
+            <p class="af-message">请先选择任务步骤。</p>
+            <p class="af-detail">-</p>
+            <p class="af-time">时间: -</p>
+          </div>
+        </div>
+
+        <!-- === Inline Payload Detail Panel === -->
+        <div class="payload-inline" id="payload-detail-panel">
+          <div class="pd-header">
+            <span class="pd-title">任务详情 / Payload Detail</span>
+            <button class="action-btn" onclick="togglePayloadDetail()">收起</button>
+          </div>
+          <div class="pd-meta">
+            <span>目标执行端: <strong>DeepSeek (deepseek)</strong></span>
+            <span>载荷状态: <strong style="color:#16a34a;">完整 (complete)</strong></span>
+            <span>可发送给 Agent: <strong>是</strong></span>
+          </div>
+          <div class="pd-content" id="payload-detail-content">
+【任务摘要】
+标题: 执行 ACB_TASK_CARD: task_demo_m3ui2a0 (sanitized)
+摘要: 从 assistantMessage 中提取到完整 ACB_TASK_CARD (sanitized)
+详情: 完整任务卡内容已保存到 fullTaskCard 字段 (sanitized)
+
+【来源元数据】
+sourceChannelId: execution-controller
+sourceDisplayName: 执行总控
+sourceConversationId: c_demo_conv_ctrl (sanitized)
+sourceMessageHash: f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6 (sanitized)
+sourceCapturedAt: 2026-06-01T11:55:00Z
+sourceActionStepIndex: 1
+taskCardId: task_demo_m3ui2a0
+
+【Payload 校验】
+payloadStatus: complete
+canSendToAgent: true
+startMarker: true
+endMarker: true
+taskCardIdMatched: true
+targetMatched: true
+requiredFieldsMissing: 无
+
+【预检 / 执行准备】
+preflightStatus: not_run (matched=false)
+readinessStatus: not_run (matched=false)
+提示: 当前任务卡尚未执行 readiness 检查，请先运行"检查执行准备状态"。
+
+【完整任务卡】
+&lt;ACB_TASK_CARD id="task_demo_m3ui2a0" target="deepseek" version="1"&gt;
+taskCardId: task_demo_m3ui2a0
+target: deepseek
+taskTitle: 创建 M3-UI.2-A-0 当前控制台状态静态基线
+projectDir: &lt;project-root&gt; (sanitized)
+currentBranch: master (sanitized)
+currentCommit: c7d4f37 (sanitized)
+objective: 创建当前控制台状态静态HTML基线页 (sanitized)
+...
+&lt;ACB_TASK_CARD_END id="task_demo_m3ui2a0"&gt;
+          </div>
+          <div class="pd-footer">
+            <button class="step-btn step-btn-copy" style="border-radius:4px;padding:6px 16px;">复制完整任务卡</button>
+            <button class="action-btn" onclick="togglePayloadDetail()">关闭</button>
+            <span style="font-size:11px;color:#666;">就绪</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== RIGHT COLUMN: Tool Endpoints / Bridge / Safety ===== -->
+      <div class="col-right">
+
+        <!-- Safety Lock -->
+        <div class="section-block safety-box">
+          <h3>安全锁（只读）</h3>
+          <div class="feedback-row"><span class="fb-label">安全锁:</span><span class="fb-value">已锁定</span></div>
+          <div class="feedback-row"><span class="fb-label">执行:</span><span class="fb-value">关闭</span></div>
+          <div class="feedback-row"><span class="fb-label">Agent 派发:</span><span class="fb-value">关闭</span></div>
+          <div class="feedback-row"><span class="fb-label">命令执行:</span><span class="fb-value">关闭</span></div>
+          <div class="feedback-row"><span class="fb-label">Git 写入:</span><span class="fb-value">关闭</span></div>
+          <button class="action-btn" disabled>解锁（后续功能）</button>
+        </div>
+
+        <!-- Tool Endpoint Cards -->
+        <div class="section-block tool-box">
+          <h3>工具端 / 执行端</h3>
+
+          <!-- VS Code Bridge -->
+          <div class="tool-card">
+            <p class="t-name"><span class="t-dot" style="background:#16a34a;"></span>VS Code Bridge</p>
+            <p class="t-line">类型: bridge | 状态: 已连接 (sanitized)</p>
+            <p class="t-line">可接收任务卡: true</p>
+            <p class="t-line">自动执行: false | 需确认: true</p>
+            <p class="t-note">仅支持任务卡查看端审查</p>
+          </div>
+
+          <!-- DeepSeek -->
+          <div class="tool-card">
+            <p class="t-name"><span class="t-dot" style="background:#9ca3af;"></span>DeepSeek</p>
+            <p class="t-line">类型: agent | 状态: 未接入</p>
+            <p class="t-line">可接收任务卡: false</p>
+            <p class="t-line">自动执行: false | 需确认: true</p>
+            <p class="t-note">手动复制 / 待配置</p>
+          </div>
+
+          <!-- Codex -->
+          <div class="tool-card">
+            <p class="t-name"><span class="t-dot" style="background:#9ca3af;"></span>Codex</p>
+            <p class="t-line">类型: agent | 状态: 未接入</p>
+            <p class="t-line">可接收任务卡: false</p>
+            <p class="t-line">自动执行: false | 需确认: true</p>
+            <p class="t-note">手动复制 / 待配置</p>
+          </div>
+
+          <!-- Claude Code -->
+          <div class="tool-card">
+            <p class="t-name"><span class="t-dot" style="background:#9ca3af;"></span>Claude Code</p>
+            <p class="t-line">类型: agent | 状态: 未接入</p>
+            <p class="t-line">可接收任务卡: false</p>
+            <p class="t-line">自动执行: false | 需确认: true</p>
+            <p class="t-note">手动复制 / 待配置</p>
+          </div>
+
+          <!-- PowerShell -->
+          <div class="tool-card">
+            <p class="t-name"><span class="t-dot" style="background:#9ca3af;"></span>PowerShell</p>
+            <p class="t-line">类型: terminal | 状态: 未接入</p>
+            <p class="t-line">可接收任务卡: false</p>
+            <p class="t-line">自动执行: false | 需确认: true</p>
+            <p class="t-note">手动执行 / 待配置</p>
+          </div>
+
+          <!-- Git -->
+          <div class="tool-card">
+            <p class="t-name"><span class="t-dot" style="background:#9ca3af;"></span>Git</p>
+            <p class="t-line">类型: scm | 状态: 只读</p>
+            <p class="t-line">可接收任务卡: false</p>
+            <p class="t-line">自动执行: false | 需确认: true</p>
+            <p class="t-note">禁止自动写入</p>
+          </div>
+
+          <!-- Build / Check -->
+          <div class="tool-card">
+            <p class="t-name"><span class="t-dot" style="background:#9ca3af;"></span>Build / Check</p>
+            <p class="t-line">类型: qa | 状态: 只读</p>
+            <p class="t-line">可接收任务卡: false</p>
+            <p class="t-line">自动执行: false | 需确认: true</p>
+            <p class="t-note">仅展示状态</p>
+          </div>
+        </div>
+
+        <!-- Bridge Details (collapsed) -->
+        <details id="bridge-details-section" style="margin-bottom:10px;">
+          <summary>桥接与任务卡审查详情（折叠）</summary>
+          <div class="bridge-section" style="margin-top:8px;">
+            <h3>本地 Bridge 状态</h3>
+            <div class="feedback-row"><span class="fb-label">Bridge 状态:</span><span class="fb-value">已连接 (sanitized)</span></div>
+            <div class="feedback-row"><span class="fb-label">响应时间:</span><span class="fb-value">2026-06-01T12:00:00Z (sanitized)</span></div>
+            <div class="feedback-row"><span class="fb-label">Bridge 版本:</span><span class="fb-value">1.0.0 (sanitized)</span></div>
+            <div class="feedback-row"><span class="fb-label">noAutoDispatch:</span><span class="fb-value">true</span></div>
+            <div class="feedback-row"><span class="fb-label">noCommandExecution:</span><span class="fb-value">true</span></div>
+            <div class="feedback-row"><span class="fb-label">任务卡审查已接受:</span><span class="fb-value">false</span></div>
+            <div class="feedback-row"><span class="fb-label">任务卡 ID:</span><span class="fb-value">-</span></div>
+            <div class="feedback-row"><span class="fb-label">任务卡目标:</span><span class="fb-value">-</span></div>
+            <div class="feedback-row"><span class="fb-label">上下文 ID:</span><span class="fb-value">f1a2b3::execution-controller::0::task_demo_m3ui2a0 (sanitized)</span></div>
+            <p style="margin:6px 0 0 0;font-size:11px;color:#6b7280;">- (VS Code 查看端最近发送状态)</p>
+          </div>
+        </details>
+
+        <!-- Preflight / Readiness / Project Status (collapsed) -->
+        <details id="runtime-details-section" style="margin-bottom:10px;">
+          <summary>预检 / 就绪门禁 / 项目状态（折叠）</summary>
+
+          <div class="project-section" style="margin-top:8px;">
+            <h3>本地项目状态</h3>
+            <div class="feedback-row"><span class="fb-label">状态结果:</span><span class="fb-value">ok (sanitized)</span></div>
+            <div class="feedback-row"><span class="fb-label">项目路径:</span><span class="fb-value">/fake/path/to/ACB (sanitized)</span></div>
+            <div class="feedback-row"><span class="fb-label">分支:</span><span class="fb-value">master (sanitized)</span></div>
+            <div class="feedback-row"><span class="fb-label">当前 Commit:</span><span class="fb-value">c7d4f37 (sanitized)</span></div>
+            <div class="feedback-row"><span class="fb-label">工作树状态:</span><span class="fb-value">clean (sanitized)</span></div>
+            <div class="feedback-row"><span class="fb-label">Safety noAutoDispatch:</span><span class="fb-value">true</span></div>
+            <div class="feedback-row"><span class="fb-label">Safety noCmdExec:</span><span class="fb-value">true</span></div>
+          </div>
+
+          <div class="preflight-section">
+            <h3>本地任务卡预检</h3>
+            <div class="feedback-row"><span class="fb-label">预检状态:</span><span class="fb-value">not_run (sanitized)</span></div>
+            <div class="feedback-row"><span class="fb-label">执行允许:</span><span class="fb-value">false</span></div>
+            <div class="feedback-row"><span class="fb-label">Agent 派发允许:</span><span class="fb-value">false</span></div>
+            <div class="feedback-row"><span class="fb-label">Git 写入允许:</span><span class="fb-value">false</span></div>
+            <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <button class="step-btn disabled" disabled>检查任务卡预检</button>
+              <span style="font-size:11px;color:#6b7280;">当前未选择可预检的动作步骤。</span>
+            </div>
+          </div>
+
+          <div class="readiness-section">
+            <h3>执行前只读门禁</h3>
+            <div class="feedback-row"><span class="fb-label">门禁状态:</span><span class="fb-value">not_run (sanitized)</span></div>
+            <div class="feedback-row"><span class="fb-label">执行允许:</span><span class="fb-value">false</span></div>
+            <div class="feedback-row"><span class="fb-label">noAutoDispatch:</span><span class="fb-value">true</span></div>
+            <div class="feedback-row"><span class="fb-label">noCommandExecution:</span><span class="fb-value">true</span></div>
+            <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <button class="action-btn" style="border-color:#a16207;color:#a16207;">检查执行准备状态</button>
+            </div>
+          </div>
+        </details>
+
+        <!-- Export Report -->
+        <div class="report-section">
+          <h3>测试报告</h3>
+          <textarea class="report-textarea" rows="8" readonly placeholder="导出测试报告后此处显示报告内容...">(sanitized - 导出测试报告按钮可在操作栏找到)</textarea>
+          <p style="margin:4px 0 0 0;font-size:11px;min-height:14px;color:#2e7d32;">已复制到剪贴板 (sanitized demo)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================== -->
+<!-- C. CURRENT-STATE ELEMENT INVENTORY                                         -->
+<!-- ========================================================================== -->
+<div class="inventory-section">
+  <h2>C. 当前控制台元素清单 (Current-State Element Inventory)</h2>
+  <div style="overflow-x:auto;">
+  <table class="inventory-table">
+    <thead>
+      <tr>
+        <th>元素名称 (Element)</th>
+        <th>当前位置 (Location)</th>
+        <th>可见模式 (Mode)</th>
+        <th>角色 (Role)</th>
+        <th>假数据样本 (Fake Sample Value)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>控制台标题</td><td>顶部 Header 条</td><td>Both</td><td>控制台标识</td><td><code>ACB 控制台 / M3-UI.0</code></td>
+      </tr>
+      <tr>
+        <td>刷新按钮</td><td>操作栏左侧</td><td>Both</td><td>刷新控制台全部状态</td><td>按钮: "刷新"</td>
+      </tr>
+      <tr>
+        <td>导出测试报告按钮</td><td>操作栏左侧</td><td>Both</td><td>导出完整测试报告并复制到剪贴板</td><td>按钮: "导出测试报告"</td>
+      </tr>
+      <tr>
+        <td>测试本地 Bridge 按钮</td><td>操作栏左侧</td><td>Both</td><td>检测本地 Bridge 健康状态</td><td>按钮: "测试本地 Bridge"</td>
+      </tr>
+      <tr>
+        <td>刷新本地项目状态按钮</td><td>操作栏左侧</td><td>Both</td><td>刷新项目 Git/路径状态</td><td>按钮: "刷新本地项目状态"</td>
+      </tr>
+      <tr>
+        <td>检查执行准备状态按钮</td><td>操作栏左侧</td><td>Both</td><td>运行 Readiness Gate 检查</td><td>按钮: "检查执行准备状态"</td>
+      </tr>
+      <tr>
+        <td>采集当前对话按钮</td><td>操作栏左侧 (仅 ChatGPT 页面)</td><td>Both</td><td>手动采集当前 ChatGPT 对话</td><td>按钮: "采集当前对话"</td>
+      </tr>
+      <tr>
+        <td>普通/调试模式切换</td><td>操作栏右侧</td><td>Both</td><td>切换 consoleDisplayMode</td><td>按钮: "普通模式" / "调试模式"</td>
+      </tr>
+      <tr>
+        <td>项目名称 Chip</td><td>顶部项目状态条</td><td>Both</td><td>显示项目/工作区名称</td><td><code>ACB Workspace (sanitized)</code></td>
+      </tr>
+      <tr>
+        <td>Bridge 状态 Chip</td><td>顶部项目状态条</td><td>Both</td><td>显示 Bridge 连接状态 + 刷新按钮</td><td><code>connected (sanitized)</code></td>
+      </tr>
+      <tr>
+        <td>分支 Chip</td><td>顶部项目状态条</td><td>Both</td><td>显示当前 Git 分支</td><td><code>master</code></td>
+      </tr>
+      <tr>
+        <td>Commit Chip</td><td>顶部项目状态条</td><td>Both</td><td>显示当前 HEAD commit</td><td><code>c7d4f37</code></td>
+      </tr>
+      <tr>
+        <td>工作树 Chip</td><td>顶部项目状态条</td><td>Both</td><td>显示 working tree 状态</td><td><code>clean (sanitized)</code></td>
+      </tr>
+      <tr>
+        <td>安全 Chip</td><td>顶部项目状态条</td><td>Both</td><td>显示安全锁定状态</td><td><code>locked_readonly / 只读锁定</code></td>
+      </tr>
+      <tr>
+        <td>预检 Chip</td><td>顶部项目状态条</td><td>Both</td><td>显示 Preflight 状态</td><td><code>not_run (sanitized)</code></td>
+      </tr>
+      <tr>
+        <td>就绪 Chip</td><td>顶部项目状态条</td><td>Both</td><td>显示 Readiness 状态</td><td><code>not_run (sanitized)</code></td>
+      </tr>
+      <tr>
+        <td>审查 Chip</td><td>顶部项目状态条</td><td>Both</td><td>显示 Task Card Review 发送状态</td><td><code>not_sent (sanitized)</code></td>
+      </tr>
+      <tr>
+        <td>安全状态行</td><td>顶部项目状态条下方</td><td>Both</td><td>安全标志汇总</td><td><code>Exec=false · Agent=false · Cmd=false · Git=false</code></td>
+      </tr>
+      <tr>
+        <td>更多项目信息 (折叠)</td><td>顶部项目状态条</td><td>Both (折叠)</td><td>项目路径、Git Root、Selected Channel/Status/Hash、刷新时间</td><td>路径、Git Root (sanitized)</td>
+      </tr>
+      <tr>
+        <td>刷新项目状态 (top actions)</td><td>顶部项目状态条内联</td><td>Both</td><td>刷新项目状态按钮</td><td>按钮: "刷新项目状态"</td>
+      </tr>
+      <tr>
+        <td>设置（未开放）</td><td>顶部项目状态条内联</td><td>Both</td><td>占位按钮，禁用状态</td><td>按钮: "设置（未开放）"</td>
+      </tr>
+      <tr>
+        <td>只读锁定入口</td><td>顶部项目状态条内联</td><td>Both</td><td>显示锁定状态，不支持解锁</td><td>按钮: "只读锁定入口" (disabled)</td>
+      </tr>
+      <tr>
+        <td>更多信息 (展开/折叠)</td><td>顶部项目状态条内联</td><td>Both</td><td>切换"更多项目信息"详情</td><td>按钮: "更多信息"</td>
+      </tr>
+      <tr>
+        <td>GPT 身份卡列表</td><td>左栏</td><td>Both</td><td>5 个身份卡 (执行总控 + 4 顾问)</td><td>执行总控 (selected + pinned), 工程/测试/安全/UIUX 参谋</td>
+      </tr>
+      <tr>
+        <td>身份卡状态点</td><td>左栏身份卡内</td><td>Both</td><td>unread(红) / pending(黄) / done(绿) / seen(灰)</td><td>红点 (unread)</td>
+      </tr>
+      <tr>
+        <td>身份卡 sourceConversationId</td><td>左栏身份卡内</td><td>Both</td><td>来源对话标识</td><td><code>c_demo_conv_ctrl (sanitized)</code></td>
+      </tr>
+      <tr>
+        <td>新建身份卡（未开放）</td><td>左栏身份卡下方</td><td>Both</td><td>占位按钮，禁用</td><td>按钮: "新建身份卡（未开放）"</td>
+      </tr>
+      <tr>
+        <td>绑定当前页面到此卡</td><td>左栏身份卡下方</td><td>Both</td><td>页面绑定操作</td><td>按钮: "绑定当前页面到此卡"</td>
+      </tr>
+      <tr>
+        <td>打开原对话</td><td>左栏身份卡下方</td><td>Both</td><td>打开选中身份卡的原对话链接</td><td>按钮: "打开原对话"</td>
+      </tr>
+      <tr>
+        <td>当前消息 / 任务卡区域</td><td>中栏顶部</td><td>Both</td><td>通道信息 + 用户消息 + 助手消息预览</td><td>通道基本信息 + 脱敏假消息内容</td>
+      </tr>
+      <tr>
+        <td>标为已读/挂起/完成按钮</td><td>中栏消息区</td><td>Both</td><td>通道状态标记操作</td><td>按钮: "标为已读" / "标为挂起" / "标为完成"</td>
+      </tr>
+      <tr>
+        <td>sourceConversationId 字段</td><td>中栏消息区</td><td>Debug only</td><td>来源对话ID (正常模式隐藏)</td><td><code>c_demo_conv_ctrl (sanitized)</code></td>
+      </tr>
+      <tr>
+        <td>sourceUrl 字段</td><td>中栏消息区</td><td>Debug only</td><td>来源URL (正常模式隐藏)</td><td><code>https://example.com/mock-chatgpt.html</code></td>
+      </tr>
+      <tr>
+        <td>哈希值 字段</td><td>中栏消息区</td><td>Debug only</td><td>消息哈希 (正常模式隐藏)</td><td><code>f1a2b3c4d5... (sanitized)</code></td>
+      </tr>
+      <tr>
+        <td>当前反馈类型面板</td><td>中栏中部</td><td>Both</td><td>分类展示 (type/title/summary/behavior/status/attention/execution/nextAction/confidence/source)</td><td>execution / urgent / action_required</td>
+      </tr>
+      <tr>
+        <td>编辑分类表单</td><td>中栏分类面板内</td><td>Both</td><td>手动修改分类 (feedbackType/title/summary/defaultBehavior/recommendedStatus/attentionLevel/needsExecution/suggestedNextAction/confidence)</td><td>全字段可编辑</td>
+      </tr>
+      <tr>
+        <td>保存分类 / 重置为自动识别</td><td>中栏分类面板内</td><td>Both</td><td>保存手动分类或重置为自动</td><td>按钮: "保存分类" / "重置为自动识别"</td>
+      </tr>
+      <tr>
+        <td>动作步骤区域 (Action Steps)</td><td>中栏分类面板内底部</td><td>Both</td><td>红色虚线边框，仅在 feedbackType=execution 或 needsExecution=true 时激活</td><td>含"生成动作步骤"按钮 + 步骤卡片列表</td>
+      </tr>
+      <tr>
+        <td>生成动作步骤按钮</td><td>动作步骤区域内</td><td>Both</td><td>根据当前 feedback 和 classification 生成 Action Plan</td><td>按钮: "生成动作步骤"</td>
+      </tr>
+      <tr>
+        <td>步骤卡片 (Step Card)</td><td>动作步骤区域列表</td><td>Both</td><td>每个 Action Step 一张卡片: 步骤号、target badge、payload status badge、可发送 badge、标题、来源信息</td><td>DeepSeek target / complete status / 可发送</td>
+      </tr>
+      <tr>
+        <td>检查可发送状态按钮</td><td>步骤卡片内 (非 controller step)</td><td>Both</td><td>运行 unified sendability check</td><td>按钮: "检查可发送状态" (紫色)</td>
+      </tr>
+      <tr>
+        <td>发送到 VS Code 查看端按钮</td><td>步骤卡片内</td><td>Both</td><td>发送完整任务卡到 VS Code Bridge 审查 (不执行)</td><td>按钮: "发送到 VS Code 查看端" (可/禁用)</td>
+      </tr>
+      <tr>
+        <td>复制给 [Target] 按钮</td><td>步骤卡片内 (canSend=true)</td><td>Both</td><td>复制完整任务卡到剪贴板</td><td>按钮: "复制给 DeepSeek"</td>
+      </tr>
+      <tr>
+        <td>查看详情按钮</td><td>步骤卡片内</td><td>Both</td><td>打开任务详情 / Payload Detail 面板</td><td>按钮: "查看详情"</td>
+      </tr>
+      <tr>
+        <td>Payload Preflight 按钮</td><td>步骤卡片内 (Debug only, canSend=true)</td><td>Debug only</td><td>执行 Payload Preflight 本地预检</td><td>按钮: "Payload Preflight"</td>
+      </tr>
+      <tr>
+        <td>Readiness Gate 按钮</td><td>步骤卡片内 (Debug only, !isController)</td><td>Debug only</td><td>执行 Readiness Gate 检查</td><td>按钮: "Readiness Gate"</td>
+      </tr>
+      <tr>
+        <td>编辑步骤属性 (折叠)</td><td>步骤卡片内底部</td><td>Both</td><td>可展开编辑 target/status/title/summary/detail</td><td>details/summary 折叠</td>
+      </tr>
+      <tr>
+        <td>检查与操作结果面板</td><td>动作步骤区域底部</td><td>Both</td><td>统一操作反馈: title / level / message / detail / time</td><td>"检查与操作结果" / "请先选择任务步骤。"</td>
+      </tr>
+      <tr>
+        <td>任务详情 / Payload Detail 面板</td><td>中栏底部 (inline)</td><td>Both</td><td>显示任务摘要、来源元数据、Payload 校验、预检/就绪状态、完整任务卡</td><td>可展开/收起</td>
+      </tr>
+      <tr>
+        <td>复制完整任务卡 (Payload panel)</td><td>Payload Detail 面板底部</td><td>Both</td><td>复制完整任务卡到剪贴板</td><td>按钮: "复制完整任务卡"</td>
+      </tr>
+      <tr>
+        <td>安全锁（只读）面板</td><td>右栏顶部</td><td>Both</td><td>安全锁状态 + 执行/Agent/命令/Git 关闭状态 + 解锁按钮(禁用)</td><td>已锁定 / 全关闭</td>
+      </tr>
+      <tr>
+        <td>工具端 / 执行端面板</td><td>右栏中部</td><td>Both</td><td>7 个工具端点卡片: VS Code Bridge, DeepSeek, Codex, Claude Code, PowerShell, Git, Build/Check</td><td>各卡片含类型/状态/可接收/自动执行/备注</td>
+      </tr>
+      <tr>
+        <td>桥接与任务卡审查详情 (折叠)</td><td>右栏下部</td><td>Debug only</td><td>Bridge 状态/版本/安全标志/审查接受状态/错误</td><td>折叠块</td>
+      </tr>
+      <tr>
+        <td>预检/就绪门禁/项目状态 (折叠)</td><td>右栏下部</td><td>Debug only</td><td>Project Status + Preflight + Readiness 详细信息</td><td>折叠块</td>
+      </tr>
+      <tr>
+        <td>旧卡片探索数据 (Legacy)</td><td>中栏</td><td>Debug only</td><td>非主流程的旧 cards 统计</td><td>Cards Count: 0 / 0 / 0 / 0 / 0</td>
+      </tr>
+      <tr>
+        <td>测试报告文本区域</td><td>右栏底部</td><td>Both</td><td>显示导出的测试报告文本 (只读 textarea)</td><td>报告内容 + 复制状态</td>
+      </tr>
+      <tr>
+        <td>调试模式隐藏字段提示</td><td>操作栏模式切换旁</td><td>Debug only</td><td>提示文字 "调试信息已展开"</td><td><code>调试信息已展开</code></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- ========================================================================== -->
+<!-- D. CURRENT-STATE CHECKLIST FOR USER COMPARISON                             -->
+<!-- ========================================================================== -->
+<div class="checklist-section">
+  <h2>D. 用户对比检查清单 (User Comparison Checklist)</h2>
+  <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px;">
+    对照真实 ACB 浏览器控制台截图，逐项勾选匹配/不匹配：
+  </p>
+  <table class="checklist-table">
+    <thead>
+      <tr><th>检查项</th><th>匹配 ✓</th><th>不匹配 ✗</th><th>备注</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>顶部状态栏位置匹配 / 不匹配 (top status bar position)</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td></td></tr>
+      <tr><td>顶部状态栏 Chip 内容匹配 (project/Bridge/branch/commit/tree/safety/preflight/readiness/review chips)</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td></td></tr>
+      <tr><td>顶部状态栏操作按钮匹配 (刷新项目状态/设置/只读锁定/更多信息)</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td></td></tr>
+      <tr><td>安全状态行匹配 (locked_readonly / Exec/Agent/Cmd/Git flags)</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td></td></tr>
+      <tr><td>左栏身份卡列表匹配 (5 通道，含选中/固定状态)</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td></td></tr>
+      <tr><td>左栏身份卡字段匹配 (roleType/binding/capturedAt/hash/sourceConversationId)</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td></td></tr>
+      <tr><td>左栏身份控制器匹配 (新建/绑定/打开原对话)</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td></td></tr>
+      <tr><td>中栏当前消息/任务卡区域匹配</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td></td></tr>
+      <tr><td>中栏分类面板匹配 (分类展示 + 编辑表单)</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td></td></tr>
+      <tr><td>中栏动作步骤区域匹配 (红色虚线框 / Action Steps / 生成按钮)</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td></td></tr>
+      <tr><td>操作按钮匹配 — 检查可发送状态</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td></td></tr>
+      <tr><td>操作按钮匹配 — 发送到 VS Code 查看端</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td></td></tr>
+      <tr><td>操作按钮匹配 — 复制给 [Target]</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td></td></tr>
+      <tr><td>操作按钮匹配 — 查看详情</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td></td></tr>
+      <tr><td>检查与操作结果面板匹配</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td></td></tr>
+      <tr><td>右栏安全锁面板匹配</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td></td></tr>
+      <tr><td>右栏工具端/执行端面板匹配 (7 个工具卡片)</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td></td></tr>
+      <tr><td>右栏 Bridge 详情匹配</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td></td></tr>
+      <tr><td>右栏预检/就绪/项目状态匹配</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td></td></tr>
+      <tr><td>右栏测试报告匹配</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td></td></tr>
+      <tr><td>正常/调试模式字段可见性匹配</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td>检查 sourceConversationId/sourceUrl/hash 在 normal 模式是否隐藏</td></tr>
+      <tr><td>Payload Detail 面板匹配</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td></td></tr>
+      <tr><td>操作栏按钮布局匹配</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td></td></tr>
+      <tr><td>整体密度匹配 (overall density)</td><td><input type="checkbox" class="check-input"></td><td><input type="checkbox" class="check-input"></td><td></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ========================================================================== -->
+<!-- OBSERVED CURRENT-STATE ISSUES (Neutral Labels)                             -->
+<!-- ========================================================================== -->
+<div class="observations-section">
+  <h2>当前状态观察 (Current-State Observations)</h2>
+  <p style="font-size:12px;color:var(--text-dim);margin-bottom:8px;">
+    以下为基于代码阅读的当前状态观察，仅为中立标签，不作为实现指令或下一版本目标。
+  </p>
+  <ul>
+    <li><strong>顶部状态栏可能换行：</strong>top-strip 使用 flex-wrap: wrap，在窄窗口下 Chip 可能换行，导致布局变化。</li>
+    <li><strong>中栏任务卡优先级可能不够突出：</strong>当前消息/任务卡区域与分类编辑面板大小相近，Action Steps 区域可能被大量编辑控件挤压。</li>
+    <li><strong>调试字段在普通模式下仍可见部分：</strong>部分字段（如 selected hash、project path）通过 data-acb-mode="debug" 控制，但部分字段的隐藏逻辑需确认实际行为。</li>
+    <li><strong>右栏工具卡片可能与中栏工作流竞争注意力：</strong>7 个工具卡片 + 安全锁 + Bridge/预检/就绪详情 + 测试报告占据较大纵向空间。</li>
+    <li><strong>动作步骤区域使用红色虚线框：</strong>当前使用 #ef4444 红色虚线边框，视觉上可能过于紧急。</li>
+    <li><strong>Payload Detail 面板为内联面板：</strong>当前实现为 console body 底部的内联面板，不是独立的 modal overlay。</li>
+  </ul>
+</div>
+
+<!-- ========================================================================== -->
+<!-- E. WHAT THIS PAGE DOES NOT DECIDE                                          -->
+<!-- ========================================================================== -->
+<div class="not-decide-section">
+  <h2>E. 本页不确定的内容 (What This Page Does Not Decide)</h2>
+  <ul>
+    <li>本页不决定 M3-UI.2-B 的实现方案。</li>
+    <li>本页不定义下一版本的目标 UI (M3-UI.2-A-1)。</li>
+    <li>本页不授权任何生产代码变更。</li>
+    <li>本页不替代长期静态蓝图页 <code>acb_console_ui_blueprint.html</code>。</li>
+    <li>本页不开放执行能力 — 所有"发送"按钮仅指审查/查看，非执行。</li>
+    <li>本页不代表 UI/UX 顾问的优化建议，仅为代码现状的视觉化重建。</li>
+    <li>本页不决定"发送到 VS Code 查看端"功能的设计变更 — 该按钮当前即<strong>仅用于审查查看</strong>，不执行命令。</li>
+  </ul>
+</div>
+
+<!-- ========================================================================== -->
+<!-- SAFETY BOUNDARY NOTE                                                       -->
+<!-- ========================================================================== -->
+<div style="background:#fff7ed;border:2px solid #c2410c;border-radius:6px;padding:14px 18px;margin-bottom:16px;">
+  <h3 style="margin:0 0 8px 0;font-size:14px;font-weight:700;color:#9a3412;">安全边界声明</h3>
+  <ul style="list-style:none;padding:0;font-size:13px;color:#9a3412;">
+    <li>executionAllowed: <strong>false</strong> — 不执行任何命令</li>
+    <li>agentDispatchAllowed: <strong>false</strong> — 不派发任何 Agent</li>
+    <li>gitWriteAllowed: <strong>false</strong> — 不写入 Git</li>
+    <li>noAutoDispatch: <strong>true</strong> — 不自动派发任务卡</li>
+    <li>noCommandExecution: <strong>true</strong> — 不运行任何命令</li>
+    <li>Safety Lock: <strong>locked_readonly</strong> — 全局只读锁定</li>
+  </ul>
+  <p style="margin:8px 0 0 0;font-size:12px;color:#b45309;">
+    "发送到 VS Code 查看端" = 审查查看，不是执行。<br>
+    sourceMetadata / reviewMetadata / contextId / hash 不得混入 Agent 任务卡正文。<br>
+    正常模式隐藏调试字段；调试模式可显示 hash / contextId / rawReport / sourceMetadata / reviewMetadata / diagnostic fields。
+  </p>
+</div>
+
+<!-- ========================================================================== -->
+<!-- FOOTNOTE                                                                   -->
+<!-- ========================================================================== -->
+<div class="page-footnote">
+  <span>M3-UI.2-A-0 当前正式控制台状态复刻 · current-state static baseline · 2026-06-01</span>
+  <span>仅用于校验执行端是否理解当前 UI · 不连接任何外部服务 · 不执行任务</span>
+</div>
+
+<!-- ========================================================================== -->
+<!-- MINIMAL JS (local demo toggle only)                                        -->
+<!-- ========================================================================== -->
+<script>
+function setMode(mode) {
+  var normalBtn = document.getElementById('btn-normal');
+  var debugBtn = document.getElementById('btn-debug');
+  var debugHint = document.getElementById('debug-hint');
+  var isDebug = mode === 'debug';
+
+  // Toggle mode buttons
+  normalBtn.className = isDebug ? 'mode-btn inactive' : 'mode-btn active';
+  debugBtn.className = isDebug ? 'mode-btn active' : 'mode-btn inactive';
+  debugHint.style.display = isDebug ? '' : 'none';
+
+  // Toggle debug-only rows in center column
+  var debugRows = [
+    'row-conversation-id',
+    'row-source-url',
+    'row-hash'
+  ];
+  for (var i = 0; i < debugRows.length; i++) {
+    var row = document.getElementById(debugRows[i]);
+    if (row) { row.style.display = isDebug ? '' : 'none'; }
+  }
+
+  // Toggle debug-only sections
+  var debugSections = [
+    'bridge-details-section',
+    'runtime-details-section',
+    'step-1-debug-source'
+  ];
+  for (var j = 0; j < debugSections.length; j++) {
+    var sec = document.getElementById(debugSections[j]);
+    if (sec) { sec.style.display = isDebug ? '' : 'none'; }
+  }
+
+  // Toggle legacy / debug sections (if present)
+  var legacyEl = document.getElementById('legacy-section');
+  if (legacyEl) { legacyEl.style.display = isDebug ? '' : 'none'; }
+}
+
+function togglePayloadDetail() {
+  var panel = document.getElementById('payload-detail-panel');
+  if (panel) {
+    panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
+  }
+}
+</script>
+
+</body>
+</html>

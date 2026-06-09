@@ -1,0 +1,48 @@
+{
+  "name": "AI Control Bridge Dev",
+  "version": "0.1.0",
+  "manifest_version": 3,
+  "description": "ACB M1-A mock listener demo.",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "file://*/*",
+    "http://127.0.0.1:17373/*"
+  ],
+  "background": {
+    "service_worker": "src/background/service-worker.js"
+  },
+  "action": {
+    "default_title": "ACB Console",
+    "default_popup": "src/console/console.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "file://*/*"
+      ],
+      "include_globs": [
+        "*mock/mock-chatgpt.html*"
+      ],
+      "js": [
+        "src/shared/hash.js",
+        "src/shared/storage.js",
+        "src/content/mock-listener.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*"
+      ],
+      "js": [
+        "src/shared/hash.js",
+        "src/shared/storage.js",
+        "src/content/mock-listener.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

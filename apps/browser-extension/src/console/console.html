@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ACB Console</title>
+    <link rel="stylesheet" href="./console.css" />
+  </head>
+  <body>
+    <main class="layout">
+      <header class="topbar">
+        <h1>ACB Mock Console (M1-B)</h1>
+        <div class="topbar-actions">
+          <button id="refresh-btn" type="button">Refresh</button>
+          <button id="export-report-btn" type="button">Export Test Report</button>
+        </div>
+      </header>
+
+      <p id="status">读取中...</p>
+
+      <section class="columns">
+        <aside class="column">
+          <h2>GPT Channels</h2>
+          <ul id="channelList" class="channel-list"></ul>
+        </aside>
+
+        <section class="column feedback-column">
+          <h2>Selected Feedback</h2>
+          <p><strong>通道名称：</strong><span id="channelName"></span></p>
+          <p><strong>通道类型：</strong><span id="channelType"></span></p>
+          <p><strong>hasFeedback：</strong><span id="hasFeedback"></span></p>
+          <p><strong>capturedAt：</strong><span id="capturedAt"></span></p>
+          <p><strong>hash：</strong><span id="hash"></span></p>
+          <p><strong>最新 user message：</strong></p>
+          <pre id="lastUserMessage"></pre>
+          <p><strong>最新 assistant message：</strong></p>
+          <pre id="assistantMessage"></pre>
+        </section>
+
+        <aside class="column">
+          <h2>Agent Pool</h2>
+          <ul class="agent-list">
+            <li>Codex</li>
+            <li>Claude Code</li>
+            <li>DeepSeek</li>
+            <li>PowerShell</li>
+            <li>Git / Build</li>
+          </ul>
+        </aside>
+      </section>
+
+      <section class="report-section">
+        <p><strong>Test Report:</strong></p>
+        <textarea id="reportOutput" rows="16" readonly></textarea>
+        <p id="copyStatus" class="copy-status"></p>
+      </section>
+    </main>
+
+    <script src="../shared/storage.js"></script>
+    <script src="./console.js"></script>
+  </body>
+</html>

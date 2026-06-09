@@ -1,0 +1,16 @@
+.ai-control/
+docs/00_records/
+docs/02_test_reports/
+docs/02_cloud_context/
+.env
+.env.*
+.vscode/
+.claude/
+node_modules/
+dist/
+build/
+*.log
+*.tmp
+coverage/
+.DS_Store
+Thumbs.db

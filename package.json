@@ -1,0 +1,19 @@
+{
+  "name": "acb-oss-seed",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Local-first AI Control Bridge seed repository.",
+  "license": "Apache-2.0",
+  "workspaces": [
+    "apps/vscode-extension",
+    "apps/browser-extension",
+    "packages/shared-types"
+  ],
+  "scripts": {
+    "test:vscode": "npm --prefix apps/vscode-extension run test:project-status && npm --prefix apps/vscode-extension run test:bridge"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  }
+}

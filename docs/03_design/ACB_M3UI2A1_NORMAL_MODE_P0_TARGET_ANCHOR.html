@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M3-UI.2-A-1 普通模式 P0 下一版目标视觉锚点</title>
+<style>
+/* ===== Reset ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ===== Variables ===== */
+:root {
+  --bg: #f1f5f9;
+  --surface: #fff;
+  --surface-hi: #f9fafb;
+  --border: #e5e7eb;
+  --text: #0f172a;
+  --text-dim: #475569;
+  --text-faint: #94a3b8;
+  --accent: #2563eb;
+  --accent-dim: #1d4ed8;
+  --accent-light: #eff6ff;
+  --green: #16a34a;
+  --green-bg: #dcfce7;
+  --green-text: #166534;
+  --yellow: #b45309;
+  --yellow-bg: #fef3c7;
+  --yellow-text: #92400e;
+  --red: #dc2626;
+  --red-bg: #fee2e2;
+  --red-text: #991b1b;
+  --grey: #6b7280;
+  --grey-bg: #f1f5f9;
+  --lock-red: #c2410c;
+  --lock-red-bg: #fff7ed;
+  --blue: #1d4ed8;
+  --blue-bg: #eff6ff;
+  --radius: 6px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --mono: "SF Mono", "Cascadia Code", "Consolas", "Microsoft YaHei Mono", monospace;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+/* ===== Page Header ===== */
+.page-header {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+.page-header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--accent-dim);
+}
+.page-header .subtitle {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+.page-header .badge-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid;
+}
+.badge-target { background: var(--blue-bg); color: var(--blue); border-color: var(--blue); }
+.badge-warn   { background: var(--yellow-bg); color: var(--yellow); border-color: var(--yellow); }
+.badge-info   { background: var(--green-bg); color: var(--green-text); border-color: var(--green); }
+.badge-red    { background: var(--red-bg); color: var(--red); border-color: var(--red); }
+
+/* ===== Section blocks (outside console) ===== */
+.info-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+.info-section h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.info-section h3 {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 12px 0 6px 0;
+}
+.info-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.info-table th, .info-table td {
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+.info-table th {
+  background: var(--surface-hi);
+  font-weight: 700;
+  color: var(--text-dim);
+  font-size: 11px;
+}
+.info-table code {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: #f1f5f9;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+/* ===== Console Shell ===== */
+.console-shell {
+  background: var(--surface);
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  overflow: hidden;
+  max-width: 1280px;
+}
+
+/* Console Header */
+.console-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: #1e293b;
+  color: #fff;
+}
+.console-header .title {
+  font-size: 14px;
+  font-weight: bold;
+}
+.console-header .close-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 16px;
+  cursor: default;
+  padding: 2px 6px;
+}
+
+/* ===== Top Status Strip (compact, normal mode) ===== */
+.top-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  min-width: 0;
+}
+.top-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.top-chip .t-dot {
+  width: 6px; height: 6px; border-radius: 50%; display: inline-block; flex-shrink: 0;
+}
+.dot-green  { background: #16a34a; }
+.dot-red    { background: #dc2626; }
+.dot-grey   { background: #94a3b8; }
+.top-chip-project  { background: #dbeafe; color: #1e40af; }
+.top-chip-bridge   { background: #dcfce7; color: #166534; }
+.top-chip-branch   { background: #ede9fe; color: #5b21b6; }
+.top-chip-commit   { background: #f5f3ff; color: #4c1d95; }
+.top-chip-tree     { background: #fef3c7; color: #92400e; }
+.top-chip-safety   { background: #fee2e2; color: #991b1b; }
+
+.top-actions-right {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.mini-btn {
+  padding: 2px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #fff;
+  color: #475569;
+  font-size: 11px;
+  cursor: default;
+  font-family: var(--font);
+}
+.mini-btn:disabled {
+  opacity: 0.5;
+}
+
+/* Safety lock banner */
+.safety-lock-banner {
+  background: var(--lock-red-bg);
+  border-bottom: 2px solid var(--lock-red);
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #9a3412;
+}
+.safety-lock-banner .lock-label { flex: 1; }
+.safety-lock-banner .lock-badge {
+  background: var(--lock-red);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+}
+
+/* ===== Three-Column Layout ===== */
+.three-col {
+  display: grid;
+  grid-template-columns: 220px 1fr 230px;
+  gap: 0;
+  min-height: 420px;
+}
+.col-left {
+  padding: 12px;
+  border-right: 1px solid #e2e8f0;
+  background: #fafafa;
+  overflow-y: auto;
+}
+.col-center {
+  padding: 14px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.col-right {
+  padding: 10px;
+  border-left: 1px solid #e2e8f0;
+  background: #fafafa;
+  overflow-y: auto;
+}
+
+/* ===== Left: Identity Cards ===== */
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.id-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  cursor: default;
+}
+.id-card.selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: inset 3px 0 0 #2563eb;
+}
+.id-card .id-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.id-card .id-name {
+  font-weight: 600;
+  flex: 1;
+  min-width: 0;
+}
+.id-card .id-tag {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+.id-tag-unread  { background: #fee2e2; color: #dc2626; }
+.id-tag-pending { background: #fef3c7; color: #b45309; }
+.id-tag-done    { background: #dcfce7; color: #16a34a; }
+.id-tag-idle    { background: #f1f5f9; color: #94a3b8; }
+
+/* ===== Center: Task Card Area (DOMINANT) ===== */
+.task-card-area {
+  background: #fff;
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 16px;
+  position: relative;
+}
+.task-card-area .tc-label {
+  position: absolute;
+  top: -10px;
+  left: 14px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 0 10px;
+  border-radius: 4px;
+  line-height: 20px;
+}
+.task-card-area .tc-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.task-card-area .tc-meta-row strong {
+  color: var(--text);
+}
+.task-card-area .tc-badge-inline {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #fff;
+}
+.badge-target-ds  { background: #6366f1; }
+.badge-complete   { background: #16a34a; }
+.badge-incomplete { background: #dc2626; }
+.badge-warning    { background: #ea580c; }
+
+.task-card-body {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 10px 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.6;
+  max-height: 200px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: #334155;
+  margin: 8px 0;
+}
+.task-card-body .tc-key   { color: #2563eb; }
+.task-card-body .tc-val   { color: #16a34a; }
+.task-card-body .tc-comment { color: #94a3b8; }
+
+/* Feedback summary (compact, subordinate to task card) */
+.feedback-summary {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.feedback-summary .fs-source {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ===== Primary/Secondary Buttons ===== */
+.btn-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 10px;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 16px;
+  border-radius: var(--radius);
+  border: 1px solid;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: default;
+  font-family: var(--font);
+  white-space: nowrap;
+}
+/* PRIMARY — biggest, most prominent */
+.btn-primary {
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  background: var(--accent-dim);
+  color: #fff;
+  border-color: var(--accent-dim);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+/* Secondary actions */
+.btn-secondary {
+  background: #fff;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+.btn-send {
+  background: #0f766e;
+  color: #fff;
+  border-color: #0f766e;
+}
+.btn-send:disabled, .btn-send.disabled {
+  background: #e2e8f0;
+  color: #94a3b8;
+  border-color: #cbd5e1;
+}
+.btn-copy {
+  background: #fff;
+  color: #16a34a;
+  border-color: #16a34a;
+}
+.btn-detail {
+  background: #fff;
+  color: #2563eb;
+  border-color: #2563eb;
+}
+.btn:disabled, .btn.disabled {
+  opacity: 0.5;
+}
+
+/* ===== Check Result Panel (BELOW task card - intentional target) ===== */
+.result-panel {
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  margin-top: 10px;
+  font-size: 12px;
+}
+.result-panel .rp-header {
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.result-panel .rp-body {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.result-panel .rp-time {
+  font-size: 10px;
+  color: var(--text-faint);
+  margin-top: 4px;
+}
+.rp-not-run   { background: #f8fafc; border-color: #cbd5e1; }
+.rp-not-run .rp-header { color: #64748b; }
+.rp-ready     { background: #dcfce7; border-color: #16a34a; }
+.rp-ready .rp-header { color: #166534; }
+.rp-warning   { background: #fef3c7; border-color: #eab308; }
+.rp-warning .rp-header { color: #92400e; }
+.rp-blocked   { background: #fee2e2; border-color: #dc2626; }
+.rp-blocked .rp-header { color: #991b1b; }
+
+/* Bridge disconnected warning (compact) */
+.bridge-warning {
+  background: #fef3c7;
+  border: 1px solid #eab308;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #92400e;
+  margin-top: 4px;
+}
+
+/* ===== Right: Tool Endpoint Cards (compact/secondary) ===== */
+.tool-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  background: #fff;
+  cursor: default;
+}
+.tool-card .t-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 2px;
+}
+.tool-card .t-status {
+  font-size: 10px;
+  color: #94a3b8;
+}
+.tool-card .t-dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+.tool-card .t-note {
+  font-size: 10px;
+  color: #cbd5e1;
+  margin-top: 2px;
+}
+
+/* ===== More Info (collapsed by default) ===== */
+.more-info-section {
+  margin-top: 8px;
+  border-top: 1px dashed #e2e8f0;
+  padding-top: 8px;
+}
+.more-info-section summary {
+  font-size: 11px;
+  color: #94a3b8;
+  cursor: default;
+}
+.more-info-section .more-body {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #94a3b8;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 16px;
+}
+
+/* ===== State Examples Strip ===== */
+.state-examples {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 12px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+}
+.state-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 11px;
+  flex: 1;
+  min-width: 150px;
+}
+.state-card .sc-status {
+  font-weight: 700;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+.state-card .sc-desc {
+  color: var(--text-dim);
+}
+
+/* ===== Footers ===== */
+.page-footnote {
+  text-align: center;
+  padding: 10px 20px;
+  font-size: 11px;
+  color: var(--text-faint);
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+}
+
+/* Safety boundary section */
+.safety-section {
+  background: #fff7ed;
+  border: 2px solid #c2410c;
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  margin-bottom: 16px;
+}
+.safety-section h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #9a3412;
+  margin-bottom: 8px;
+}
+.safety-section ul {
+  list-style: none;
+  padding: 0;
+  font-size: 12px;
+  color: #9a3412;
+}
+.safety-section ul li { margin-bottom: 3px; }
+.safety-section ul li strong { font-family: var(--mono); }
+
+/* Checklist inside info sections */
+.check-cell {
+  width: 28px;
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 960px) {
+  .three-col { grid-template-columns: 1fr; }
+  .col-left, .col-right { border: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ========================================================================== -->
+<!-- A. HEADER / PURPOSE NOTE                                                   -->
+<!-- ========================================================================== -->
+<div class="page-header">
+  <h1>M3-UI.2-A-1 普通模式 P0 下一版目标视觉锚点</h1>
+  <div class="subtitle">
+    静态脱敏目标图，不连接 Bridge，不读取真实数据，不执行任务。<br>
+    本页用于 M3-UI.2-B 正式实现前的视觉验收锚点。<br>
+    <strong>A-0 是当前状态复刻；A-1 是下一版目标；长期蓝图页仅作为远期方向参考。</strong>
+  </div>
+  <div class="badge-row">
+    <span class="badge badge-target">下一版目标锚点 A-1</span>
+    <span class="badge badge-info">普通模式 P0</span>
+    <span class="badge badge-warn">不连接 Bridge</span>
+    <span class="badge badge-red">不执行任务</span>
+  </div>
+</div>
+
+<!-- ========================================================================== -->
+<!-- B. TARGET CONSOLE MOCK SURFACE (Normal Mode)                               -->
+<!-- ========================================================================== -->
+<div class="console-shell" id="target-console">
+
+  <!-- Console Header -->
+  <div class="console-header">
+    <span class="title">ACB 控制台</span>
+    <span class="close-btn">✕</span>
+  </div>
+
+  <!-- ===== Top Status Strip (compact, no detailed matching fields) ===== -->
+  <div class="top-strip">
+    <span class="top-chip top-chip-project"><span class="t-dot dot-green"></span>项目: <strong>ACB Demo</strong></span>
+    <span class="top-chip top-chip-bridge"><span class="t-dot dot-green"></span>Bridge: <strong>已连接</strong></span>
+    <span class="top-chip top-chip-branch"><span class="t-dot"></span>分支: <strong>master</strong></span>
+    <span class="top-chip top-chip-commit">Commit: <strong>abc1234</strong></span>
+    <span class="top-chip top-chip-tree"><span class="t-dot dot-green"></span>工作区: <strong>clean</strong></span>
+    <span class="top-chip top-chip-safety"><span class="t-dot dot-red"></span>安全: <strong>只读锁定</strong></span>
+    <div class="top-actions-right">
+      <button class="mini-btn" disabled>设置</button>
+      <button class="mini-btn">更多信息 ▾</button>
+    </div>
+  </div>
+
+  <!-- Safety Lock Banner (visible in normal mode) -->
+  <div class="safety-lock-banner">
+    <span>SAFETY LOCK: locked_readonly</span>
+    <span class="lock-label">仅审查 · 禁止执行 · 禁止派发 · 禁止写入</span>
+    <span class="lock-badge">只读锁定</span>
+  </div>
+
+  <!-- ===== Three-Column Layout ===== -->
+  <div class="three-col">
+
+    <!-- ===== LEFT: Identity Cards (secondary) ===== -->
+    <div class="col-left">
+      <div class="section-label">身份卡</div>
+
+      <div class="id-card selected">
+        <span class="id-dot" style="background:#dc2626;"></span>
+        <span class="id-name">执行总控</span>
+        <span class="id-tag id-tag-unread">未读</span>
+      </div>
+
+      <div class="id-card">
+        <span class="id-dot" style="background:#f59e0b;"></span>
+        <span class="id-name">UI/UX 顾问</span>
+        <span class="id-tag id-tag-pending">挂起</span>
+      </div>
+
+      <div class="id-card">
+        <span class="id-dot" style="background:#d1d5db;"></span>
+        <span class="id-name">测试负责人</span>
+        <span class="id-tag id-tag-idle">就绪</span>
+      </div>
+
+      <div class="id-card">
+        <span class="id-dot" style="background:#d1d5db;"></span>
+        <span class="id-name">合规顾问</span>
+        <span class="id-tag id-tag-idle">就绪</span>
+      </div>
+
+      <div class="id-card" style="opacity:0.5;">
+        <span class="id-dot" style="background:#d1d5db;"></span>
+        <span class="id-name">未绑定身份卡</span>
+        <span class="id-tag id-tag-idle">未绑定</span>
+      </div>
+
+      <!-- Simple identity controls -->
+      <div style="margin-top:8px;display:flex;gap:4px;flex-wrap:wrap;">
+        <button class="mini-btn" disabled>新建</button>
+        <button class="mini-btn">绑定</button>
+        <button class="mini-btn">打开原对话</button>
+      </div>
+    </div>
+
+    <!-- ===== CENTER: Task Card (DOMINANT) + Result Panel below ===== -->
+    <div class="col-center">
+
+      <!-- Compact feedback source line (subordinate) -->
+      <div class="feedback-summary">
+        <span class="fs-source">执行总控</span> · 最新捕获: 2026-06-01 12:00 · 通道状态: 未读
+      </div>
+
+      <!-- === TASK CARD AREA (visually dominant) === -->
+      <div class="task-card-area">
+        <span class="tc-label">任务卡</span>
+
+        <!-- Meta row: taskCardId, target, payload completeness -->
+        <div class="tc-meta-row">
+          <span><strong>taskCardId:</strong> task_20260601_demo_001</span>
+          <span><strong>target:</strong> <span class="tc-badge-inline badge-target-ds">DeepSeek</span></span>
+          <span><strong>payload:</strong> <span class="tc-badge-inline badge-complete">完整</span></span>
+          <span><strong>可发送:</strong> 是</span>
+        </div>
+
+        <!-- Task card body -->
+        <div class="task-card-body">
+<span class="tc-comment">&lt;ACB_TASK_CARD id="task_20260601_demo_001" target="deepseek" version="1"&gt;</span>
+<span class="tc-key">taskCardId</span>: <span class="tc-val">task_20260601_demo_001</span>
+<span class="tc-key">target</span>: <span class="tc-val">deepseek</span>
+<span class="tc-key">taskTitle</span>: <span class="tc-val">示例任务卡 — 脱敏假数据</span>
+<span class="tc-key">projectDir</span>: <span class="tc-val">&lt;project-root&gt; (sanitized)</span>
+<span class="tc-key">currentBranch</span>: <span class="tc-val">master</span>
+<span class="tc-key">currentCommit</span>: <span class="tc-val">d71b301</span>
+<span class="tc-key">objective</span>: <span class="tc-val">演示 P0 目标 UI — 不执行任何任务</span>
+<span class="tc-key">allowedFiles</span>:
+  - <span class="tc-val">docs/03_design/*</span>
+<span class="tc-key">forbiddenActions</span>:
+  - <span class="tc-val">不修改生产代码</span>
+  - <span class="tc-val">不连接 Bridge</span>
+<span class="tc-key">checks</span>:
+  - <span class="tc-val">git status before</span>
+  - <span class="tc-val">git diff after</span>
+<span class="tc-key">acceptanceCriteria</span>:
+  - <span class="tc-val">HTML 页面可通过浏览器打开</span>
+<span class="tc-comment">&lt;ACB_TASK_CARD_END id="task_20260601_demo_001"&gt;</span></div>
+
+        <!-- === PRIMARY ACTION BUTTON (biggest, most prominent) === -->
+        <div class="btn-row">
+          <button class="btn btn-primary">检查可发送状态</button>
+          <button class="btn btn-send">发送到 VS Code 查看端</button>
+          <button class="btn btn-copy">复制完整任务卡</button>
+          <button class="btn btn-detail">查看详情</button>
+        </div>
+      </div>
+
+      <!-- === CHECK RESULT PANEL (intentionally BELOW task card area) === -->
+      <div class="result-panel rp-ready" id="result-panel-demo">
+        <div class="rp-header">可发送 — 检查通过</div>
+        <div class="rp-body">
+          任务卡完整，项目状态匹配，安全锁保持只读。<br>
+          可发送到 VS Code 查看端进行审查。发送后不会自动执行。
+        </div>
+        <div class="rp-time">检查时间: 2026-06-01 12:05 (sanitized)</div>
+      </div>
+
+      <!-- Bridge disconnected subtle warning (hidden when connected) -->
+      <div class="bridge-warning" style="display:none;" id="bridge-warning-demo">
+        Bridge 未连接 — 无法发送到 VS Code 查看端，但可继续查看和复制任务卡。
+      </div>
+
+      <!-- More Info (collapsed, contains matching details moved DOWN from top strip) -->
+      <details class="more-info-section" open>
+        <summary>更多项目信息 ▸</summary>
+        <div class="more-body">
+          <span>项目路径: /fake/path (sanitized)</span>
+          <span>Git Root: /fake/path/.git</span>
+          <span>预检状态: pass (sanitized)</span>
+          <span>就绪状态: ready (sanitized)</span>
+          <span>审查发送: 未发送</span>
+          <span>刷新时间: 2026-06-01 12:00</span>
+        </div>
+        <p style="font-size:10px;color:#cbd5e1;margin-top:4px;">
+          详细匹配字段（projectDir matched / branch matched / commit matched / working tree 详情）及诊断数据仅在"更多信息"展开或调试模式下可见。
+        </p>
+      </details>
+
+      <!-- Note: sourceMetadata / reviewMetadata / sourceMessageHash / contextId -->
+      <!-- are NOT visible in this normal-mode target — they are debug-only -->
+    </div>
+
+    <!-- ===== RIGHT: Tool Endpoints (compact, secondary) ===== -->
+    <div class="col-right">
+      <div class="section-label">工具端点</div>
+
+      <div class="tool-card">
+        <div class="t-name"><span class="t-dot" style="background:#16a34a;"></span>VS Code Bridge</div>
+        <div class="t-status">已连接 · 仅查看端审查</div>
+        <div class="t-note">只读 · 不执行 · 不自动派发</div>
+      </div>
+
+      <div class="tool-card">
+        <div class="t-name"><span class="t-dot" style="background:#94a3b8;"></span>DeepSeek</div>
+        <div class="t-status">未接入 · 手动复制</div>
+        <div class="t-note">只读 · 不执行 · 待配置</div>
+      </div>
+
+      <div class="tool-card">
+        <div class="t-name"><span class="t-dot" style="background:#94a3b8;"></span>Codex</div>
+        <div class="t-status">未接入 · 手动复制</div>
+        <div class="t-note">只读 · 不执行 · 待配置</div>
+      </div>
+
+      <div class="tool-card">
+        <div class="t-name"><span class="t-dot" style="background:#94a3b8;"></span>Claude Code</div>
+        <div class="t-status">未接入 · 手动复制</div>
+        <div class="t-note">只读 · 不执行 · 待配置</div>
+      </div>
+
+      <div class="tool-card">
+        <div class="t-name"><span class="t-dot" style="background:#94a3b8;"></span>PowerShell / Git / Build</div>
+        <div class="t-status">只读 · 未开放</div>
+        <div class="t-note">禁止自动写入 · 需确认</div>
+      </div>
+
+      <!-- Note: detailed Bridge status / preflight / readiness raw data -->
+      <!-- is NOT shown here in normal mode — it's in debug mode / details collapse -->
+    </div>
+  </div>
+
+  <!-- ===== State Examples Strip ===== -->
+  <div class="state-examples">
+    <div class="state-card">
+      <div class="sc-status" style="color:#64748b;">未检查</div>
+      <div class="sc-desc">尚未点击"检查可发送状态"。发送按钮禁用。结果面板显示引导提示。</div>
+    </div>
+    <div class="state-card">
+      <div class="sc-status" style="color:#16a34a;">可发送</div>
+      <div class="sc-desc">任务卡完整，项目匹配，安全锁只读。可发送到 VS Code 查看端审查。</div>
+    </div>
+    <div class="state-card">
+      <div class="sc-status" style="color:#b45309;">警告</div>
+      <div class="sc-desc">任务卡完整但项目路径/分支/commit 不匹配。建议检查后再发送。</div>
+    </div>
+    <div class="state-card">
+      <div class="sc-status" style="color:#dc2626;">不可发送</div>
+      <div class="sc-desc">无完整任务卡或存在阻断项。不能发送到查看端。</div>
+    </div>
+    <div class="state-card">
+      <div class="sc-status" style="color:#dc2626;">Bridge 未连接</div>
+      <div class="sc-desc">本地 Bridge 断开。可查看和复制任务卡，但无法发送到 VS Code 查看端。</div>
+    </div>
+    <div class="state-card">
+      <div class="sc-status" style="color:#dc2626;">无完整任务卡</div>
+      <div class="sc-desc">当前没有完整任务卡。所有发送/复制按钮禁用。</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================== -->
+<!-- C. TARGET STATE MATRIX                                                     -->
+<!-- ========================================================================== -->
+<div class="info-section">
+  <h2>C. 目标状态矩阵 (Target State Matrix)</h2>
+  <div style="overflow-x:auto;">
+  <table class="info-table">
+    <thead>
+      <tr>
+        <th>状态</th>
+        <th>条件</th>
+        <th>普通模式用户消息</th>
+        <th>主操作</th>
+        <th>发送按钮</th>
+        <th>预期标签</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>未检查</strong></td>
+        <td>用户打开控制台，尚未点击检查</td>
+        <td>尚未检查当前任务卡。请点击"检查可发送状态"按钮。</td>
+        <td>检查可发送状态</td>
+        <td>禁用</td>
+        <td><code>not_run</code></td>
+      </tr>
+      <tr>
+        <td><strong>可发送</strong></td>
+        <td>任务卡完整 + 项目状态匹配 + Bridge 连接 + 安全锁只读</td>
+        <td>任务卡完整，项目状态匹配，安全锁保持只读，可发送到 VS Code 查看端审查。</td>
+        <td>发送到 VS Code 查看端</td>
+        <td>启用</td>
+        <td><code>ready / 可发送</code></td>
+      </tr>
+      <tr>
+        <td><strong>警告</strong></td>
+        <td>任务卡完整但 projectDir / branch / commit / working tree 存在差异</td>
+        <td>任务卡完整，但项目路径 / 分支 / commit / 工作区状态存在风险，建议检查后再发送到查看端。</td>
+        <td>检查可发送状态（重新检查）</td>
+        <td>启用（但建议先确认）</td>
+        <td><code>warning / 有风险</code></td>
+      </tr>
+      <tr>
+        <td><strong>不可发送</strong></td>
+        <td>存在阻断项（payload 不完整、缺失必要字段、安全门禁违规等）</td>
+        <td>当前无完整任务卡、Bridge 未连接或存在阻断项，不能发送到查看端。</td>
+        <td>检查可发送状态（查看详情）</td>
+        <td>禁用</td>
+        <td><code>blocked / 不可发送</code></td>
+      </tr>
+      <tr>
+        <td><strong>Bridge 未连接</strong></td>
+        <td>本地 Bridge 不可达</td>
+        <td>Bridge 未连接 — 无法发送到 VS Code 查看端，但可继续查看和复制任务卡。</td>
+        <td>测试本地 Bridge</td>
+        <td>禁用</td>
+        <td><code>Bridge 未连接</code></td>
+      </tr>
+      <tr>
+        <td><strong>无完整任务卡</strong></td>
+        <td>当前 feedback 不包含完整 ACB_TASK_CARD</td>
+        <td>当前没有完整任务卡。选择一个包含完整任务卡的反馈或生成 Action Steps。</td>
+        <td>生成动作步骤（如适用）</td>
+        <td>禁用</td>
+        <td><code>无完整任务卡</code></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- ========================================================================== -->
+<!-- D. VISUAL DIFF: A-1 vs A-0                                                 -->
+<!-- ========================================================================== -->
+<div class="info-section">
+  <h2>D. A-1 相对 A-0 的目标变化</h2>
+  <div style="overflow-x:auto;">
+  <table class="info-table">
+    <thead>
+      <tr><th>区域</th><th>A-0 当前状态</th><th>A-1 目标</th><th>变化原因</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>整体布局</td>
+        <td>三栏结构</td>
+        <td><strong>保持</strong>三栏结构</td>
+        <td>结构正确，无需大改</td>
+      </tr>
+      <tr>
+        <td>顶部状态栏</td>
+        <td>含 9 个 chips（项目/Bridge/分支/Commit/工作树/安全/预检/就绪/审查）+ 安全标志行</td>
+        <td><strong>精简为 6 个 chips</strong>（项目/Bridge/分支/Commit/工作区/安全）。预检/就绪/审查状态移至"更多信息"</td>
+        <td>普通模式用户不需要看到预检/就绪/审查原始状态</td>
+      </tr>
+      <tr>
+        <td>顶部安全标志行</td>
+        <td>Exec=false · Agent=false · Cmd=false · Git=false</td>
+        <td><strong>移除</strong>独立安全标志行。信息移至安全锁横幅和"更多信息"</td>
+        <td>安全锁横幅已传达"只读锁定"，原始 flags 对普通用户无意义</td>
+      </tr>
+      <tr>
+        <td>中栏任务卡区域</td>
+        <td>任务卡嵌在"当前消息/任务卡"区域中，与分类编辑面板共用空间</td>
+        <td><strong>任务卡区域独立并居中放大</strong>，蓝色边框突出，标注"任务卡"标签</td>
+        <td>P0 目标：用户第一眼看到任务卡状态</td>
+      </tr>
+      <tr>
+        <td>主操作按钮</td>
+        <td>"检查可发送状态"作为 per-step 按钮，与 send/copy/detail 同级</td>
+        <td><strong>"检查可发送状态"加大加粗</strong>，放在按钮组第一位，视觉上最突出</td>
+        <td>P0 首要行动是"检查"</td>
+      </tr>
+      <tr>
+        <td>检查结果面板</td>
+        <td>"检查与操作结果"面板在动作步骤区域底部</td>
+        <td><strong>移到任务卡区域正下方</strong>，作为独立结果面板</td>
+        <td>用户确认此位置为目标方向</td>
+      </tr>
+      <tr>
+        <td>匹配字段展示</td>
+        <td>项目路径/Git Root/Selected Channel/Hash/刷新时间在"更多信息"折叠中</td>
+        <td><strong>保持</strong>在"更多信息"折叠中，预检/就绪/审查状态也移入此处</td>
+        <td>保持一致性，所有技术诊断字段统一折叠</td>
+      </tr>
+      <tr>
+        <td>调试字段</td>
+        <td>sourceConversationId/sourceUrl/hash 在调试模式显示</td>
+        <td><strong>保持</strong>调试模式显示。sourceMetadata/reviewMetadata/contextId/rawReport 确认仅在调试模式可见</td>
+        <td>不需要改变调试模式规则</td>
+      </tr>
+      <tr>
+        <td>右栏工具端点</td>
+        <td>7 个工具卡片，含类型/状态/可接收/自动执行/备注</td>
+        <td><strong>简化为 5 个紧凑卡片</strong>，仅显示名称/连接状态/只读说明</td>
+        <td>普通用户不需要详细工具元数据</td>
+      </tr>
+      <tr>
+        <td>右栏诊断详情</td>
+        <td>Bridge 详情/预检/就绪/项目状态在单独折叠区域</td>
+        <td><strong>移除</strong>右栏详细诊断面板。诊断内容移至"更多信息"或调试模式</td>
+        <td>普通模式不应展示诊断面板</td>
+      </tr>
+      <tr>
+        <td>反馈分类面板</td>
+        <td>完整分类展示 + 编辑表单占据中栏大量空间</td>
+        <td><strong>暂不调整</strong>。分类面板保持当前形态，本轮仅优化任务卡可见性</td>
+        <td>分类面板是功能核心，不宜在 P0 急于简化</td>
+      </tr>
+      <tr>
+        <td>locked_readonly 可见性</td>
+        <td>顶部 chip + 安全标志行 + 右栏安全锁面板</td>
+        <td><strong>保留</strong>顶部安全 chip + 安全锁横幅。右栏安全锁面板暂保留。</td>
+        <td>安全锁必须始终可见</td>
+      </tr>
+      <tr>
+        <td>当前反馈类型卡片颜色</td>
+        <td>存在颜色偏差（代码与 A-0 复刻可能有差异）</td>
+        <td><strong>忽略</strong>，不作为本轮修正目标</td>
+        <td>非阻塞视觉差异</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- ========================================================================== -->
+<!-- E. BUTTON COPY TABLE                                                       -->
+<!-- ========================================================================== -->
+<div class="info-section">
+  <h2>E. 按钮文案表 (Button Copy Table)</h2>
+  <div style="overflow-x:auto;">
+  <table class="info-table">
+    <thead>
+      <tr>
+        <th>普通模式标签</th>
+        <th>用户含义</th>
+        <th>启用条件</th>
+        <th>禁用原因</th>
+        <th>禁止用词</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>检查可发送状态</strong></td>
+        <td>检查当前任务卡是否可以发送到 VS Code 查看端</td>
+        <td>有完整任务卡</td>
+        <td>无完整任务卡、无 Action Steps</td>
+        <td>禁止说"执行预检"、"运行检查"</td>
+      </tr>
+      <tr>
+        <td><strong>发送到 VS Code 查看端</strong></td>
+        <td>将完整任务卡发送到 VS Code 供人工审查（不执行）</td>
+        <td>检查通过 + Bridge 连接 + 安全锁只读</td>
+        <td>检查未通过、Bridge 断开、无完整任务卡</td>
+        <td>禁止说"执行任务"、"派发 Agent"、"运行"</td>
+      </tr>
+      <tr>
+        <td><strong>复制完整任务卡</strong></td>
+        <td>将完整任务卡复制到剪贴板，可手动粘贴给其他工具</td>
+        <td>有完整任务卡</td>
+        <td>无完整任务卡</td>
+        <td>禁止说"复制执行命令"</td>
+      </tr>
+      <tr>
+        <td><strong>查看详情</strong></td>
+        <td>打开任务详情面板，查看完整任务卡 + 校验结果</td>
+        <td>有 Action Step</td>
+        <td>无 Action Step</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>刷新 Bridge</strong></td>
+        <td>重新检测本地 Bridge 连接状态</td>
+        <td>始终可用</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>刷新项目状态</strong></td>
+        <td>重新获取本地项目 Git 状态</td>
+        <td>Bridge 连接</td>
+        <td>Bridge 断开</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>导出测试报告</strong></td>
+        <td>生成并复制完整测试报告到剪贴板</td>
+        <td>始终可用</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>更多信息 / 调试模式</strong></td>
+        <td>展开详细项目信息 / 切换到调试模式查看诊断数据</td>
+        <td>始终可用</td>
+        <td>—</td>
+        <td>禁止在普通模式直接展示调试字段</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- ========================================================================== -->
+<!-- F. NORMAL/DEBUG FIELD HIERARCHY                                            -->
+<!-- ========================================================================== -->
+<div class="info-section">
+  <h2>F. 正常/调试模式字段层级 (Normal/Debug Field Hierarchy)</h2>
+  <div style="overflow-x:auto;">
+  <table class="info-table">
+    <thead>
+      <tr><th>层级</th><th>可见条件</th><th>包含字段</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Level 1<br>始终可见</strong></td>
+        <td>正常模式，无需展开</td>
+        <td>
+          当前选中身份卡 displayName · 身份卡状态点 · 身份卡角色类型<br>
+          taskCardId · target · payload 完整性 · 检查状态 · 用户面向的检查结果<br>
+          locked_readonly / 只读锁定 · Bridge 连接/断开 · 项目名称 · 分支 · Commit · 工作区状态<br>
+          检查/发送/复制/详情按钮 · 来源身份显示名 · 最新捕获时间 · 当前反馈摘要
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Level 2<br>折叠/更多信息</strong></td>
+        <td>"更多信息"展开 或 调试模式</td>
+        <td>
+          项目路径 · Git Root · 预检状态 · 就绪状态 · 审查发送状态<br>
+          刷新时间 · Selected Channel · Selected Status
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Level 3<br>仅调试模式</strong></td>
+        <td>仅调试模式</td>
+        <td>
+          sourceMessageHash · contextId · sourceMetadata 原始值<br>
+          reviewMetadata 原始值 · rawReport · diagnostic fields<br>
+          projectDir matched · branch matched · currentCommit matched<br>
+          完整项目状态原始对象 · 内部计数器 · Legacy cards 数据<br>
+          Bridge 详细响应 · Preflight 详细检测项 · Readiness 详细门禁项
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- ========================================================================== -->
+<!-- SAFETY BOUNDARY                                                            -->
+<!-- ========================================================================== -->
+<div class="safety-section">
+  <h3>安全边界声明（本目标版本确认）</h3>
+  <ul>
+    <li><strong>executionAllowed:</strong> false — 不能通过 UI 绕过</li>
+    <li><strong>agentDispatchAllowed:</strong> false — 不派发任何 Agent</li>
+    <li><strong>gitWriteAllowed:</strong> false — 不写入 Git</li>
+    <li><strong>noAutoDispatch:</strong> true — 不自动派发任务卡</li>
+    <li><strong>noCommandExecution:</strong> true — 不运行任何命令</li>
+    <li><strong>Safety Lock:</strong> locked_readonly — 全局锁定，仅展示，不可通过 UI 解锁</li>
+    <li><strong>"发送到 VS Code 查看端":</strong> = 审查查看，不是执行</li>
+    <li><strong>sourceMetadata / reviewMetadata / contextId / hash:</strong> 不得混入 Agent 任务卡正文</li>
+    <li><strong>正常模式:</strong> 隐藏调试字段；<strong>调试模式:</strong> 可显示 hash / contextId / rawReport / sourceMetadata / reviewMetadata / diagnostic fields</li>
+  </ul>
+</div>
+
+<!-- ========================================================================== -->
+<!-- FOOTNOTE                                                                   -->
+<!-- ========================================================================== -->
+<div class="page-footnote">
+  <span>M3-UI.2-A-1 普通模式 P0 下一版目标视觉锚点 · target design artifact · 2026-06-01</span>
+  <span>仅用于 M3-UI.2-B 正式实现前的视觉验收 · 不连接任何外部服务 · 不执行任务</span>
+</div>
+
+</body>
+</html>
